@@ -1,0 +1,19 @@
+# ------------------------------------------------------------------------------
+# File: .gitlab-ci.yml
+# Author: Sumit Sharma
+# E-Mail: sumit.sharma@clustervision.com
+# Date: 2024-06-03
+# Description: This file will responsible for the CI/CD Pipeline.
+# Version: 1.0.0
+# Status: Development
+# License: GPL
+# ------------------------------------------------------------------------------
+# Notes:
+# - Chaining this file can break you CI/CD Pipeline. BE CAUTIOUS
+# ------------------------------------------------------------------------------
+
+
+
+
+
+
