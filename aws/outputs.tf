@@ -59,3 +59,52 @@ output "sg_id" {
 }
 # Output from Network Module
 # ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Output from VPN Module
+output "ipinfo" {
+  value       = var.aws_vpn ? module.vpn[0].ipinfo : null
+  description = "The Public IP Address for the installation Machine."
+}
+
+output "customer_gateway_id" {
+  value       = var.aws_vpn ? module.vpn[0].customer_gateway_id : null
+  description = "The ID of the customer gateway created in VPN Module"
+}
+
+output "vpn_gateway_id" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_gateway_id : null
+  description = "The ID of the VPN gateway ID created in VPN Module"
+}
+
+output "vpn_connection_id" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_connection_id : null
+  description = "The ID of the VPN connection ID created in VPN Module"
+}
+
+output "vpn_tunnel1_ip" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel1_ip : null
+  description = "The VPN Tunnel1 IP Address"
+}
+
+output "vpn_tunnel1_preshared_key" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel1_preshared_key : null
+  description = "The VPN Tunnel1 Preshared Key"
+}
+
+output "vpn_tunnel2_ip" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel2_ip : null
+  description = "The VPN Tunnel2 IP Address"
+}
+
+output "vpn_tunnel2_preshared_key" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel2_preshared_key : null
+  description = "The VPN Tunnel2 Preshared Key"
+}
+
+output "vpn_connection_configuration_detail" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_connection_configuration_detail : null
+  description = "The VPN configuration details"
+}
+# Output from VPN Module
+# ------------------------------------------------------------------------------

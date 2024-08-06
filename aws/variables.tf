@@ -317,3 +317,74 @@ variable "aws_security_group_rules" {
 # AWS VPC
 # ------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------ #
+# AWS VPN
+variable "aws_customer_gateway_name" {
+  description = "The AWS customer gateway name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_customer_gateway_bgp_asn" {
+  description = "The AWS customer gateway Border Gateway Protocol Autonomous System Numbe ."
+  type        = number
+  default     = 65000
+}
+
+variable "aws_customer_gateway_ip_address" {
+  description = "The AWS customer gateway internet-routable IP."
+  type        = string
+  default     = ""
+}
+
+variable "aws_customer_gateway_type" {
+  description = "The AWS customer gateway type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_gateway_name" {
+  description = "The AWS VPN gateway name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_name" {
+  description = "The AWS VPN name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_connection_type" {
+  description = "The AWS VPN connection type name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_static_routes_only" {
+  description = "The AWS VPN static route only flag."
+  type        = bool
+  default     = true
+}
+
+variable "aws_vpn_local_ipv4_network_cidr" {
+  description = "The AWS VPN local IPv4 CIDR."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_remote_ipv4_network_cidr" {
+  description = "The AWS VPN remote IPv4 CIDR."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_connection_route_cidr_block" {
+  description = "The AWS VPN connection route destination CIDR block."
+  type        = string
+  default     = ""
+}
+
+# AWS VPN
+# ------------------------------------------------------------------------------ #
+
