@@ -53,4 +53,5 @@ provider "aws" {
 # systemctl status chronyd
 # chronyc makestep
 # chronyc tracking
+# pip install boto3 # AWS SDK to import EC2 Image.
 
