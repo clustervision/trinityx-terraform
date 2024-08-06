@@ -17,97 +17,27 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: aws/main.tf
+# File: aws/modules/network/variables.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-08-05
-# Description: Variables file for the main Terraform configuration for TrinityX.
+# Date: 2024-08-06
+# Description: Variables file for the network module for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - Define all the input variables required by the main configuration and modules.
+# - Define all the input variables required by the network module.
 # - Update the default values as needed to match the target environment.
 # - Ensure sensitive variables are handled securely.
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ #
-# AWS Cloud Modules
-variable "aws_network" {
-  description = "The AWS Network(VPC)."
-  type        = bool
-  default     = false
-}
-
-variable "aws_vpn" {
-  description = "The AWS VPN."
-  type        = bool
-  default     = false
-}
-
-variable "aws_ami" {
-  description = "The AWS OS Image (VHD)."
-  type        = bool
-  default     = false
-}
-
-variable "aws_controller" {
-  description = "The AWS Controller."
-  type        = bool
-  default     = false
-}
-
-variable "aws_node" {
-  description = "The AWS Node"
-  type        = bool
-  default     = false
-}
-
-# AWS Cloud Modules
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# AWS Cloud Credentials
-variable "aws_region" {
-  description = "The AWS Region for the Installation"
-  type        = string
-  default     = "eu-central-1"
-
-  validation {
-    condition     = length(var.aws_region) >= 9
-    error_message = "The AWS Region must be a valid Region."
-  }
-}
-
-variable "access_key" {
-  description = "The AWS Access Key"
+variable "aws_availability_zone" {
+  description = "The AWS First Availability Zone for the Region"
   type        = string
   default     = ""
-
-  validation {
-    condition     = length(var.access_key) == 20
-    error_message = "The AWS Access Key must be a valid Access Key"
-  }
 }
 
-variable "secret_key" {
-  description = "The AWS Secret Key"
-  type        = string
-  sensitive   = true
-  default     = ""
-
-  validation {
-    condition     = length(var.secret_key) == 40
-    error_message = "The AWS Secret Key must be a valid Secret Key"
-  }
-}
-
-# AWS Cloud Credentials
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# AWS VPC
 variable "aws_vpc_name" {
   description = "The AWS Network(VPC)."
   type        = string
@@ -314,6 +244,6 @@ variable "aws_security_group_rules" {
     }
   ]
 }
-# AWS VPC
-# ------------------------------------------------------------------------------ #
+
+
 

@@ -17,45 +17,43 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: aws/outputs.tf
+# File: aws/modules/network/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-08-05
-# Description: Main output file for the AWS Terraform configuration for TrinityX.
+# Date: 2024-08-06
+# Description: Terraform Network Module Outputs file, will be output some of
+#              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - This file has all the output blocks.
-# - Can add/remove the output block, if you are using it seprately.
+# - This output file outputs the network related information.
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
-# Output from Network Module
 output "vpc_id" {
-  value = var.aws_network ? module.network[0].vpc_id : null
+  value = aws_vpc.trinityx.id
   description = "The ID of the VPC created in the network module"
 }
 
 output "public_subnet_id" {
-  value = var.aws_network ? module.network[0].public_subnet_id : null
+  value = aws_subnet.public_subnet.id
   description = "The ID of the public subnet created in the network module"
 }
 
 output "internet_gateway_id" {
-  value = var.aws_network ? module.network[0].internet_gateway_id : null
+  value = aws_internet_gateway.igw.id
   description = "The ID of the internet gateway created in the network module"
 }
 
 output "route_table_id" {
-  value = var.aws_network ? module.network[0].route_table_id : null
+  value = aws_route_table.public_rt.id
   description = "The ID of the routing table created in the network module"
 }
 
 output "sg_id" {
-  value = var.aws_network ? module.network[0].sg_id : null
+  value = aws_security_group.vpn_sg.id
   description = "The ID of the security group created in the network module"
 }
-# Output from Network Module
-# ------------------------------------------------------------------------------
+
+

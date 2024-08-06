@@ -34,6 +34,7 @@
 # ------------------------------------------------------------------------------
 
 # AWS Cloud Modules
+aws_network     = true
 aws_vpn         = true
 aws_ami         = true
 aws_controller  = true
@@ -43,3 +44,131 @@ aws_node        = true
 aws_region  = "eu-central-1"
 access_key  = "IAMADUMMY-ACCESS-KEY"
 secret_key  = "I-AM-A-DUMMY-SECRET-KEY-FOR-DEMO-PURPOSE"
+
+# AWS VPC
+aws_vpc_name                    = "TrinityX-Terraform-VPC"
+aws_vpc_cidr_block              = "10.1.0.0/16"
+aws_vpc_instance_tenancy        = "default"
+aws_vpc_enable_dns_support      = true
+aws_vpc_enable_dns_hostnames    = true
+
+aws_vpc_subnet_name             = "TrinityX-Terraform-Public-Subnet"
+aws_vpc_subnet_cidr_block       = "10.1.0.0/16"
+aws_vpc_internet_gateway_name   = "TrinityX-Terraform-Internet-Gateway"
+
+aws_route_table_cidr_block  = "0.0.0.0/0"
+aws_route_table_name        = "TrinityX-Terraform-Public-Route-Table"
+
+aws_network_acl_name  = "TrinityX-Terraform-Public-NACL"
+aws_network_acl_rules = [
+  {
+    direction  = "egress"
+    protocol   = "udp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 500
+    to_port    = 500
+  },
+  {
+    direction  = "egress"
+    protocol   = "udp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 4500
+    to_port    = 4500
+  },
+  {
+    direction  = "ingress"
+    protocol   = "udp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 500
+    to_port    = 500
+  },
+  {
+    direction  = "ingress"
+    protocol   = "udp"
+    rule_no    = 110
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 4500
+    to_port    = 4500
+  }
+]
+
+aws_security_group_name   = "TrinityX-Terraform-VPN-SG"
+aws_security_group_rules  = [
+  {
+    direction   = "ingress"
+    from_port   = 500
+    to_port     = 500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 4500
+    to_port     = 4500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "egress"
+    from_port   = 500
+    to_port     = 500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "egress"
+    from_port   = 4500
+    to_port     = 4500
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 7050
+    to_port     = 7050
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  },
+  {
+    direction   = "ingress"
+    from_port   = 7051
+    to_port     = 7051
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+]
