@@ -225,24 +225,23 @@ resource "aws_iam_role_policy_attachment" "s3_read_only_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
+
 resource "null_resource" "import_image" {
   provisioner "local-exec" {
-    command = "python3 ../scripts/import_image.py ${var.aws_region} ${var.access_key} ${var.secret_key}"
+    command = "aws ec2 import-image --license-type BYOL --disk-containers Format=vhd,Url=S3://trinityx-poc/trinity.vhd,Description=Rocky9 --boot-mode uefi --description 'TrinityX-Compute' --platform Linux --role-name vmimport > /tmp/import_task_id.txt"
+    environment = {
+      AWS_REGION = var.aws_region
+      AWS_ACCESS_KEY_ID = var.access_key
+      AWS_SECRET_ACCESS_KEY = var.secret_key
+    }
   }
-
-  depends_on = [
-    aws_iam_role.vmimport,
-    aws_iam_role_policy_attachment.ec2_full_access,
-    aws_iam_role_policy_attachment.ec2_role_for_ssm,
-    aws_iam_role_policy_attachment.s3_full_access,
-    aws_iam_role_policy_attachment.s3_read_only_access
-  ]
 }
 
 resource "null_resource" "import_image_status" {
   provisioner "local-exec" {
-    command = <<EOT
-      python3 import_image.py ${var.aws_region} ${var.access_key} ${var.secret_key}
+     command = <<EOT
+      task_id=$(cat /tmp/import_task_id.txt)
+      aws ec2 describe-import-image-tasks --import-task-ids $${task_id}
     EOT
     environment = {
       AWS_REGION = var.aws_region
@@ -250,11 +249,45 @@ resource "null_resource" "import_image_status" {
       AWS_SECRET_ACCESS_KEY = var.secret_key
     }
   }
-
-  depends_on = [
-    null_resource.import_image
-  ]
 }
+
+
+# resource "null_resource" "import_image" {
+#   provisioner "local-exec" {
+#     # command = "python3 ../scripts/import_image.py ${var.aws_region} ${var.access_key} ${var.secret_key}"
+#     command = "AWS_REGION=${var.aws_region} AWS_ACCESS_KEY_ID=${var.access_key} AWS_SECRET_ACCESS_KEY=${var.secret_key} aws ec2 describe-import-image-tasks --import-task-ids import-ami-0a337a443cf759da5"
+#     environment = {
+#       AWS_REGION = var.aws_region
+#       AWS_ACCESS_KEY_ID = var.access_key
+#       AWS_SECRET_ACCESS_KEY = var.secret_key
+#     }
+#   }
+
+#   depends_on = [
+#     aws_iam_role.vmimport,
+#     aws_iam_role_policy_attachment.ec2_full_access,
+#     aws_iam_role_policy_attachment.ec2_role_for_ssm,
+#     aws_iam_role_policy_attachment.s3_full_access,
+#     aws_iam_role_policy_attachment.s3_read_only_access
+#   ]
+# }
+
+# resource "null_resource" "import_image_status" {
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       python3 import_image.py ${var.aws_region} ${var.access_key} ${var.secret_key}
+#     EOT
+#     environment = {
+#       AWS_REGION = var.aws_region
+#       AWS_ACCESS_KEY_ID = var.access_key
+#       AWS_SECRET_ACCESS_KEY = var.secret_key
+#     }
+#   }
+
+#   depends_on = [
+#     null_resource.import_image
+#   ]
+# }
 
 
 # aws ec2 import-image --license-type BYOL --disk-containers Format=vhd,Url=S3://trinityx-poc/trinity.vhd,Description=Rocky9 --boot-mode uefi --description "TrinityX-Compute" --platform Linux --role-name vmimport
