@@ -46,11 +46,18 @@ variable "aws_vpn" {
   default     = false
 }
 
-variable "aws_ami" {
+variable "aws_storage" {
+  description = "The AWS Storage S3."
+  type        = bool
+  default     = false
+}
+
+variable "aws_image" {
   description = "The AWS OS Image (VHD)."
   type        = bool
   default     = false
 }
+
 
 variable "aws_controller" {
   description = "The AWS Controller."
@@ -94,7 +101,7 @@ variable "access_key" {
 variable "secret_key" {
   description = "The AWS Secret Key"
   type        = string
-  sensitive   = true
+  # sensitive   = true
   default     = ""
 
   validation {
@@ -388,3 +395,196 @@ variable "aws_vpn_connection_route_cidr_block" {
 # AWS VPN
 # ------------------------------------------------------------------------------ #
 
+# ------------------------------------------------------------------------------ #
+# AWS S3
+variable "aws_s3_bucket_prefix" {
+  description = "The name prefix for the AWS S3 bucket."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_force_destroy" {
+  description = "The AWS S3 bucket force destroy."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_bucket_name_tag" {
+  description = "The AWS S3 bucket name tag."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_env" {
+  description = "TheAWS S3 bucket environment."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_versioning" {
+  description = "The AWS S3 bucket Versioning."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_enc_algorithm" {
+  description = "The AWS S3 bucket encryption algorithm."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_key" {
+  description = "The AWS S3 bucket ey enablement."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_block_public_acls" {
+  description = "The AWS S3 bucket block public ACL."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_block_public_policy" {
+  description = "The AWS S3 bucket bloc public policy."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_ignore_public_acls" {
+  description = "The AWS S3 bucket ignore public ACL."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_restrict_public_buckets" {
+  description = "The AWS S3 bucket restrict public buckets."
+  type        = bool
+  default     = false
+}
+# AWS S3
+# ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS Image
+variable "aws_s3_object_key_path" {
+  description = "The AWS S3 Object key(remote path)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_source" {
+  description = "The AWS S3 Object Source(local path)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_content_type" {
+  description = "The AWS S3 Object content type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_encryption" {
+  description = "The AWS S3 Object encryption."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_name" {
+  description = "The AWS IAM role name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_version" {
+  description = "The AWS IAM role policy version."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_effect" {
+  description = "The AWS IAM role policy effect."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_service" {
+  description = "The AWS IAM role policy service."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_action" {
+  description = "The AWS IAM role policy action."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_ec2_access" {
+  description = "The AWS IAM role policy EC2 Access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_ec2_role" {
+  description = "The AWS IAM role policy EC2 Role for SSM."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_s3_access" {
+  description = "The AWS IAM role policy S3 Access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_s3_read" {
+  description = "The AWS IAM role policy S3 read-only access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_license_type" {
+  description = "The AWS AMI image license type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_boot_mode" {
+  description = "The AWS AMI image boot mode."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_description" {
+  description = "The AWS AMI image description."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_platform" {
+  description = "The AWS AMI image platform."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_role" {
+  description = "The AWS AMI image role for import."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_container_format" {
+  description = "The AWS AMI image container format."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_containe_desc" {
+  description = "The AWS AMI image container description."
+  type        = string
+  default     = ""
+}
+# AWS Image
+# ------------------------------------------------------------------------------ #

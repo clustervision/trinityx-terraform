@@ -36,7 +36,8 @@
 # AWS Cloud Modules
 aws_network     = true
 aws_vpn         = true
-aws_ami         = true
+aws_storage     = true
+aws_image       = true
 aws_controller  = true
 aws_node        = true
 
@@ -188,3 +189,41 @@ aws_vpn_local_ipv4_network_cidr   = "10.141.0.0/16"
 aws_vpn_remote_ipv4_network_cidr  = "10.1.0.0/16"
 
 aws_vpn_connection_route_cidr_block = "10.141.0.0/16"
+
+# AWS S3
+aws_s3_bucket_prefix            = "trinityx"
+aws_s3_force_destroy            = true
+aws_s3_bucket_name_tag          = "TrinityX Bucket"
+aws_s3_bucket_env               = "Dev"
+aws_s3_bucket_versioning        = "Enabled"
+aws_s3_bucket_enc_algorithm     = "AES256"
+aws_s3_bucket_key               = true
+aws_s3_block_public_acls        = true
+aws_s3_block_public_policy      = true
+aws_s3_ignore_public_acls       = true
+aws_s3_restrict_public_buckets  = true
+
+# AWS Image
+aws_s3_object_key_path      = "images/trinityx.vhd"
+aws_s3_object_source        = "/trinity/images/trinityx.vhd"
+aws_s3_object_content_type  = "application/octet-stream"
+aws_s3_object_encryption    = "AES256"
+
+aws_iam_role_name           = "vmimport"
+aws_iam_role_policy_version = "2012-10-17"
+aws_iam_role_policy_effect  = "Allow"
+aws_iam_role_policy_service = "vmie.amazonaws.com"
+aws_iam_role_policy_action  = "sts:AssumeRole"
+
+aws_iam_role_policy_ec2_access  = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+aws_iam_role_policy_ec2_role    = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+aws_iam_role_policy_s3_access   = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+aws_iam_role_policy_s3_read     = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+
+aws_image_license_type      = "BYOL"
+aws_image_boot_mode         = "uefi"
+aws_image_description       = "TrinityX-Compute"
+aws_image_platform          = "Linux"
+aws_image_role              = "vmimport"
+aws_image_container_format  = "vhd"
+aws_image_containe_desc     = "Rocky9"
