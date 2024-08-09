@@ -8,6 +8,7 @@ aws/.terraform
 aws/.terraform.lock.hcl*
 aws/terraform.tfvars
 aws/terraform.tfstate*
+aws/.terraform.tfstate.lock.info
 
 gcp/.terraform
 gcp/.terraform.lock.hcl

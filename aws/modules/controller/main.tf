@@ -179,5 +179,5 @@ resource "aws_instance" "controller" {
 resource "aws_network_interface_attachment" "trinityx_nic_attachment" {
   instance_id          = aws_instance.controller.id
   network_interface_id = aws_network_interface.trinityx_nic.id
-  device_index         = 0
+  device_index         = 1
 }
