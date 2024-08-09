@@ -588,3 +588,124 @@ variable "aws_image_containe_desc" {
 }
 # AWS Image
 # ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS Controller
+# ------------------------------------------------------------------------------ #
+variable "aws_controller_ami_latest" {
+  description = "The AWS AMI most recent flag."
+  type        = bool
+  default     = false
+}
+
+variable "aws_controller_ami_filter_by" {
+  description = "The AWS AMI filter by."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ami_filter_values" {
+  description = "The AWS AMI filter values."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ami_owners" {
+  description = "The AWS AMI owners."
+  type        = list(string)
+  default     = []
+}
+
+variable "aws_controller_instance_type" {
+  description = "The AWS controller instance type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_automatic_public_ip" {
+  description = "The AWS controller automatic association of public IP."
+  type        = bool
+  default     = false
+}
+
+variable "aws_controller_root_device_size" {
+  description = "The AWS controller root block device size in GB."
+  type        = number
+  default     = 0
+}
+
+variable "aws_controller_root_device_type" {
+  description = "The AWS controller root block device type(HDD, SSD, or Magnetic)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_name" {
+  description = "The AWS controller name tag."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ip" {
+  description = "The AWS controller IP address."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_eip_domain" {
+  description = "The AWS controller elastic IP domain."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ssh_public_key" {
+  description = "The public SSH key for AWS controller."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_os_username" {
+  description = "The AWS controller username."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_os_password" {
+  description = "The AWS controller password."
+  type        = string
+  default     = ""
+}
+
+# ------------------------------------------------------------------------------ #
+# AWS Node
+variable "aws_hostlist" {
+  description = "List of AWS nodes in the format aws[001-004]"
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_instance_type" {
+  description = "The AWS Node instance type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_automatic_public_ip" {
+  description = "The AWS node automatic association of public IP."
+  type        = bool
+  default     = false
+}
+
+variable "aws_node_root_device_size" {
+  description = "The AWS node root block device size in GB."
+  type        = number
+  default     = 0
+}
+
+variable "aws_node_root_device_type" {
+  description = "The AWS node root block device type(HDD, SSD, or Magnetic)."
+  type        = string
+  default     = ""
+}
+# ------------------------------------------------------------------------------ #
+

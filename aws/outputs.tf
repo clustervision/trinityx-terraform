@@ -137,3 +137,36 @@ output "ami_id" {
 }
 # Output from Image Module
 # ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Output from Controller Module
+output "aws_controller_ami_id" {
+  description = "The AWS Controller AMI ID"
+  value       = var.aws_controller ? module.controller[0].aws_controller_ami_id : null
+}
+
+output "controller_id" {
+  description = "The AWS controller EC2 instance ID"
+  value       = var.aws_controller ? module.controller[0].controller_id : null
+}
+
+output "controller_public_ip" {
+  description = "The AWS controller public IP address"
+  value       = var.aws_controller ? module.controller[0].controller_public_ip : null
+}
+# Output from Controller Module
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Output from Node Module
+output "node_id" {
+  value       = var.aws_node ? module.node[0].node_id : null
+  description = "The ID of the Node"
+}
+
+output "node_ip" {
+  value       = var.aws_node ? module.node[0].node_ip : null
+  description = "The IP of the Node"
+}
+# Output from Controller Module
+# ------------------------------------------------------------------------------

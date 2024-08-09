@@ -157,3 +157,74 @@ module "image" {
   aws_image_containe_desc     = var.aws_image_containe_desc
 }
 
+# ------------------------------------------------------------------------------
+# Controller Module
+# This module will create and set up the TrinityX Controller on the AWS.
+# ------------------------------------------------------------------------------
+module "controller" {
+  count             = var.aws_controller ? 1 : 0
+  source            = "./modules/controller"
+  vpc_id            = module.network[0].vpc_id
+  public_subnet_id  = module.network[0].public_subnet_id
+  sg_id             = module.network[0].sg_id
+
+  aws_controller_ami_latest         = var.aws_controller_ami_latest
+  aws_controller_ami_filter_by      = var.aws_controller_ami_filter_by
+  aws_controller_ami_filter_values  = var.aws_controller_ami_filter_values
+  aws_controller_ami_owners         = var.aws_controller_ami_owners
+
+  aws_controller_instance_type        = var.aws_controller_instance_type
+  aws_controller_automatic_public_ip  = var.aws_controller_automatic_public_ip
+  aws_controller_root_device_size     = var.aws_controller_root_device_size
+  aws_controller_root_device_type     = var.aws_controller_root_device_type
+  aws_controller_name                 = var.aws_controller_name
+  aws_controller_ip                   = var.aws_controller_ip
+  aws_controller_eip_domain           = var.aws_controller_eip_domain
+  aws_controller_ssh_public_key       = var.aws_controller_ssh_public_key
+  aws_controller_os_username          = var.aws_controller_os_username
+  aws_controller_os_password          = var.aws_controller_os_password
+
+}
+
+# ------------------------------------------------------------------------------
+# Node(s) Calculation
+# This block will expand the node hostlist and prepare a node list for Node Module.
+# ------------------------------------------------------------------------------
+locals {
+  count     = var.aws_node ? 1 : 0
+  hostnames = [
+    for i in var.aws_hostlist != "" ? range(tonumber(regex("\\[(\\d+)-(\\d+)\\]", var.aws_hostlist)[0]), tonumber(regex("\\[(\\d+)-(\\d+)\\]", var.aws_hostlist)[1]) + 1) : [] : format(
+      "%s%03d%s",
+      regex("^(.*?)\\[", var.aws_hostlist)[0],
+      i,
+      regex("\\](.*?)$", var.aws_hostlist)[0]
+    )
+  ]
+}
+
+resource "null_resource" "controller_dependency" {
+  count = var.aws_controller && var.aws_node ? 1 : 0
+  depends_on = [module.controller]
+}
+
+# ------------------------------------------------------------------------------
+# Node Module
+# This module will create and set up the TrinityX Nodes on the AWS.
+# ------------------------------------------------------------------------------
+module "node" {
+  count     = var.aws_node ? 1 : 0
+  source    = "./modules/node"
+  hostnames = local.hostnames
+
+  ami_id            = module.image[0].ami_id
+  vpc_id            = module.network[0].vpc_id
+  public_subnet_id  = module.network[0].public_subnet_id
+  sg_id             = module.network[0].sg_id
+
+  aws_node_instance_type        = var.aws_node_instance_type
+  aws_node_automatic_public_ip  = var.aws_node_automatic_public_ip
+  aws_node_root_device_size     = var.aws_node_root_device_size
+  aws_node_root_device_type     = var.aws_node_root_device_type
+
+  depends_on =  [null_resource.controller_dependency]
+}

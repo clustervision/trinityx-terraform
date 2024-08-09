@@ -162,12 +162,12 @@ resource "null_resource" "import_image_status" {
         status_message=$(jq -r '.ImportImageTasks[0].StatusMessage' /tmp/.trinityx/import_task_result.txt)
         progress=$(jq -r '.ImportImageTasks[0].Progress' /tmp/.trinityx/import_task_result.txt)
         echo "Task ID:        $${task_id}"
-        echo "Current status: $${status}"
+        echo "Current Status: $${status}"
         if [ "$status_message" != "null" ]; then
           echo "Status Message: $${status_message}"
         fi
         if [ "$progress" != "null" ]; then
-          echo "Progress: $${progress}%"
+          echo "Progress:       $${progress}%"
         fi
         if [ "$status" == "deleted" ]; then
           echo "Import task failed: $${status_message}"
@@ -222,17 +222,17 @@ data "local_file" "ami_id" {
 # Remove Log
 # This block will remove the status log messages from the tmp directory.
 # ------------------------------------------------------------------------------
-resource "null_resource" "remove_status_log" {
-  provisioner "local-exec" {
-    command = "rm -rf /tmp/.trinityx"
-  }
+# resource "null_resource" "remove_status_log" {
+#   provisioner "local-exec" {
+#     command = "rm -rf /tmp/.trinityx"
+#   }
 
-  depends_on = [
-    aws_s3_object.compute_image,
-    null_resource.import_image,
-    null_resource.import_image_status
-  ]
-}
+#   depends_on = [
+#     aws_s3_object.compute_image,
+#     null_resource.import_image,
+#     null_resource.import_image_status
+#   ]
+# }
 
 
 
