@@ -169,15 +169,25 @@ variable "aws_security_group_rules" {
     to_port     = number
     protocol    = string
     cidr_blocks = list(string)
+    description = string
     
   }))
   default = [
     {
+      direction   = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
+    },
+    {
       direction   = "ingress"
       from_port   = 500
       to_port     = 500
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
     },
     {
       direction   = "ingress"
@@ -185,6 +195,7 @@ variable "aws_security_group_rules" {
       to_port     = 4500
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
     },
     {
       direction   = "egress"
@@ -192,6 +203,7 @@ variable "aws_security_group_rules" {
       to_port     = 500
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
     },
     {
       direction   = "egress"
@@ -199,6 +211,7 @@ variable "aws_security_group_rules" {
       to_port     = 4500
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
     },
     {
       direction   = "ingress"
@@ -206,6 +219,7 @@ variable "aws_security_group_rules" {
       to_port     = 22
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow SSH"
     },
     {
       direction   = "ingress"
@@ -213,6 +227,7 @@ variable "aws_security_group_rules" {
       to_port     = 80
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTP"
     },
     {
       direction   = "ingress"
@@ -220,6 +235,7 @@ variable "aws_security_group_rules" {
       to_port     = 443
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTPS"
     },
     {
       direction   = "ingress"
@@ -227,6 +243,7 @@ variable "aws_security_group_rules" {
       to_port     = 8080
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow OOD 8080"
     },
     {
       direction   = "ingress"
@@ -234,6 +251,7 @@ variable "aws_security_group_rules" {
       to_port     = 7050
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7050"
     },
     {
       direction   = "ingress"
@@ -241,9 +259,11 @@ variable "aws_security_group_rules" {
       to_port     = 7051
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7051"
     }
   ]
 }
+
 
 
 

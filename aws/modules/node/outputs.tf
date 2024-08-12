@@ -40,3 +40,12 @@ output "node_ip" {
   description = "The IP of the Node"
   value       = { for k, v in aws_instance.node : k => v.private_ip }
 }
+
+output "node_ami_id" {
+  value       = data.aws_ami.node_ami.id #var.ami_id
+  description = "The AMI ID."
+}
+
+output "account_id" {
+  value = data.aws_caller_identity.current.account_id
+}

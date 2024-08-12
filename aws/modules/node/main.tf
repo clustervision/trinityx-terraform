@@ -35,12 +35,28 @@
 
 # ------------------------------------------------------------------------------
 # AWS Node
+# This block will collect the Account ID for the Next query.
+# ------------------------------------------------------------------------------
+data "aws_caller_identity" "current" {}
+
+# ------------------------------------------------------------------------------
+# Get AMI
+# This block will fetch the latest uploaded AMI ID by Terraform.
+# ------------------------------------------------------------------------------
+data "aws_ami" "node_ami" {
+  most_recent = true
+
+  owners = [data.aws_caller_identity.current.account_id]
+}
+
+# ------------------------------------------------------------------------------
+# AWS Node
 # This block will create EC2 Instances for the TrinityX nodes, depending on the
 # provided hostlist.
 # ------------------------------------------------------------------------------
 resource "aws_instance" "node" {
   for_each      = toset(var.hostnames)
-  ami           = var.ami_id
+  ami           = data.aws_ami.node_ami.id
   instance_type = var.aws_node_instance_type
   subnet_id     = var.public_subnet_id
 

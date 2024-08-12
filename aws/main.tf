@@ -216,15 +216,17 @@ module "node" {
   source    = "./modules/node"
   hostnames = local.hostnames
 
-  ami_id            = module.image[0].ami_id
-  vpc_id            = module.network[0].vpc_id
-  public_subnet_id  = module.network[0].public_subnet_id
-  sg_id             = module.network[0].sg_id
+  vpc_id            = var.vpc_id != "" ? var.vpc_id : module.network[0].vpc_id
+  public_subnet_id  = var.public_subnet_id != "" ? var.public_subnet_id : module.network[0].public_subnet_id
+  sg_id             = var.sg_id != "" ? var.sg_id : module.network[0].sg_id
 
   aws_node_instance_type        = var.aws_node_instance_type
   aws_node_automatic_public_ip  = var.aws_node_automatic_public_ip
   aws_node_root_device_size     = var.aws_node_root_device_size
   aws_node_root_device_type     = var.aws_node_root_device_type
 
-  depends_on =  [null_resource.controller_dependency]
+  depends_on =  [
+    null_resource.controller_dependency,
+    module.image
+    ]
 }

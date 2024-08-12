@@ -22,9 +22,9 @@
 # E-Mail: sumit.sharma@clustervision.com
 # Date: 2024-08-09
 # Description: Terraform module for creating EC2 Instance for TrinityX controller
-#              in AWS including fetch the latest AMI ID, Network interface
-#              creation with controller IP, EC2 Instance creation, and association
-#              of the Elastic IP to the AWS Controller
+#              in AWS including fetch the latest AMI ID, get the elastic IP,
+#              create the Network interface, attach the Elastic IP to the Network
+#              Interface, and create the EC2 Instance for the controller.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -52,37 +52,40 @@ data "aws_ami" "controller_ami_id" {
 }
 
 # ------------------------------------------------------------------------------
+# AWS Controller Elastic IP
+# This block will get the Elastic IP for the AWS Controller.
+# ------------------------------------------------------------------------------
+resource "aws_eip" "trinityx_eip" {
+  domain   = var.aws_controller_eip_domain
+
+  tags = {
+    Name = "${var.aws_controller_name}-eip"
+  }
+
+}
+
+# ------------------------------------------------------------------------------
 # AWS Controller Network Interface
 # This block will create the network interface for the AWS Controller.
 # ------------------------------------------------------------------------------
 resource "aws_network_interface" "trinityx_nic" {
   subnet_id   = var.public_subnet_id
   private_ips = [var.aws_controller_ip]
-
   security_groups = [var.sg_id]
-
-  # attachment {
-  #   instance     = aws_instance.controller.id
-  #   device_index = 0
-  # }
 
   tags = {
     Name = "${var.aws_controller_name}-nic"
   }
 
-  # depends_on = [aws_instance.controller]
 }
 
 # ------------------------------------------------------------------------------
-# AWS Controller Elastic IP
-# This block will associate the Elastic IP to the AWS Controller.
+# Attach Elastic IP
+# This block will attach the Elastic IP to the Network Interface of AWS Controller.
 # ------------------------------------------------------------------------------
-resource "aws_eip" "trinityx_eip" {
-  network_interface = aws_network_interface.trinityx_nic.id
-  associate_with_private_ip = var.aws_controller_ip
-  # instance = aws_instance.controller.id
-  # domain   = var.aws_controller_eip_domain
-
+resource "aws_eip_association" "trinityx_eip_association" {
+  allocation_id        = aws_eip.trinityx_eip.id
+  network_interface_id = aws_network_interface.trinityx_nic.id
 }
 
 # ------------------------------------------------------------------------------
@@ -93,15 +96,11 @@ resource "aws_eip" "trinityx_eip" {
 resource "aws_instance" "controller" {
   ami           = data.aws_ami.controller_ami_id.id
   instance_type = var.aws_controller_instance_type
-  subnet_id     = var.public_subnet_id
 
-  # associate_public_ip_address = var.aws_controller_automatic_public_ip
-  vpc_security_group_ids      = [var.sg_id]
-
-  # network_interface {
-  #   device_index          = 0
-  #   network_interface_id  = aws_network_interface.trinityx_nic.id
-  # }
+  network_interface {
+    device_index          = 0
+    network_interface_id  = aws_network_interface.trinityx_nic.id
+  }
 
   root_block_device {
     volume_size = var.aws_controller_root_device_size
@@ -172,12 +171,9 @@ resource "aws_instance" "controller" {
   tags = {
     Name = var.aws_controller_name
   }
+
+  depends_on = [aws_eip_association.trinityx_eip_association]
 }
 
 
-# Attach the network interface to the EC2 instance
-resource "aws_network_interface_attachment" "trinityx_nic_attachment" {
-  instance_id          = aws_instance.controller.id
-  network_interface_id = aws_network_interface.trinityx_nic.id
-  device_index         = 1
-}
+

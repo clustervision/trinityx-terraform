@@ -170,3 +170,10 @@ output "node_ip" {
 }
 # Output from Controller Module
 # ------------------------------------------------------------------------------
+output "node_ami_id" {
+  value       = var.aws_node ? module.node[0].node_ami_id : null
+  description = "The AMI ID."
+}
+output "account_id" {
+  value = var.aws_node ? module.node[0].account_id : null
+}

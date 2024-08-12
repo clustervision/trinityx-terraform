@@ -162,6 +162,7 @@ resource "aws_security_group" "vpn_sg" {
       to_port     = egress.value.to_port
       protocol    = egress.value.protocol
       cidr_blocks = egress.value.cidr_blocks
+      description = egress.value.description
     }
   }
 
@@ -172,6 +173,7 @@ resource "aws_security_group" "vpn_sg" {
       to_port     = ingress.value.to_port
       protocol    = ingress.value.protocol
       cidr_blocks = ingress.value.cidr_blocks
+      description = ingress.value.description
     }
   }
 
@@ -179,8 +181,6 @@ resource "aws_security_group" "vpn_sg" {
     Name = var.aws_security_group_name
   }
 }
-
-
 
 
 
