@@ -159,21 +159,41 @@ output "controller_public_ip" {
 
 # ------------------------------------------------------------------------------
 # Output from Node Module
+output "account_id" {
+  description = "The Account ID of the Current User."
+  value = var.aws_node ? module.node[0].account_id : null
+}
+
+output "node_ami_id" {
+  description = "The AMI ID."
+  value       = var.aws_node ? module.node[0].node_ami_id : null
+}
+
 output "node_id" {
-  value       = var.aws_node ? module.node[0].node_id : null
   description = "The ID of the Node"
+  value       = var.aws_node ? module.node[0].node_id : null
 }
 
 output "node_ip" {
-  value       = var.aws_node ? module.node[0].node_ip : null
   description = "The IP of the Node"
+  value       = var.aws_node ? module.node[0].node_ip : null
+}
+
+output "node_interface_id" {
+  description = "The Interface ID for the Node"
+  value = var.aws_node ? module.node[0].node_interface_id : null
+}
+
+output "node_mac_address" {
+  description = "The MAC address of the EC2 instance"
+  value = var.aws_node ? module.node[0].node_mac_address : null
 }
 # Output from Controller Module
 # ------------------------------------------------------------------------------
-output "node_ami_id" {
-  value       = var.aws_node ? module.node[0].node_ami_id : null
-  description = "The AMI ID."
-}
-output "account_id" {
-  value = var.aws_node ? module.node[0].account_id : null
-}
+
+
+
+
+
+
+

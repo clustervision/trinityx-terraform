@@ -21,7 +21,9 @@
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
 # Date: 2024-08-09
-# Description: Terraform module for creating EC2 Instances for nodes in AWS.
+# Description: Terraform module for creating EC2 Instances for nodes in AWS
+#              including fetch the Account ID and latest uploaded AMI ID, EC2
+#              Instances creation, and retrieve the MAC Address for each node.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -72,3 +74,16 @@ resource "aws_instance" "node" {
     Name = each.key
   }
 }
+
+# ------------------------------------------------------------------------------
+# AWS Node Mac Address
+# This data block will retrieve the MAC Address for each node.
+# ------------------------------------------------------------------------------
+data "aws_network_interface" "node_mac" {
+  for_each = aws_instance.node
+  id       = each.value.primary_network_interface_id
+
+  depends_on = [ aws_instance.node ]
+}
+
+

@@ -41,11 +41,29 @@ output "node_ip" {
   value       = { for k, v in aws_instance.node : k => v.private_ip }
 }
 
+output "node_interface_id" {
+  description = "The Interface ID for the Node"
+  value       = { for k, v in aws_instance.node : k => v.primary_network_interface_id }
+}
+
 output "node_ami_id" {
-  value       = data.aws_ami.node_ami.id #var.ami_id
   description = "The AMI ID."
+  value       = data.aws_ami.node_ami.id
 }
 
 output "account_id" {
+  description = "The Account ID of the Current User."
   value = data.aws_caller_identity.current.account_id
 }
+
+output "node_mac_address" {
+  description = "The MAC address of the EC2 instance"
+  value       = { for k, v in data.aws_network_interface.node_mac : k => v.mac_address }
+}
+
+
+
+
+
+
+

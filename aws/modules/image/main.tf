@@ -183,6 +183,7 @@ resource "null_resource" "import_image_status" {
         ami_id=$(jq -r '.ImportImageTasks[0].ImageId' /tmp/.trinityx/import_task_result.txt)
         snapshot_id=$(jq -r '.ImportImageTasks[0].SnapshotDetails[0].SnapshotId' /tmp/.trinityx/import_task_result.txt)
         s3_url=$(jq -r '.ImportImageTasks[0].SnapshotDetails[0].Url' /tmp/.trinityx/import_task_result.txt)
+        aws ec2 create-tags --resources $${ami_id} --tags Key=Name,Value=${var.aws_image_description}
         echo $${ami_id} > /tmp/.trinityx/ami_id.txt
         echo "AMI ID: $${ami_id}"
         echo "Snapshot ID: $${snapshot_id}"

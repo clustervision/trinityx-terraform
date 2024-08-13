@@ -38,12 +38,6 @@ variable "hostnames" {
   default     = []
 }
 
-# variable "ami_id" {
-#   description = "The AWS TrinityX AMI ID for GRUB and iPXE Booting."
-#   type        = string
-#   default     = ""
-# }
-
 variable "vpc_id" {
   description = "The AWS VPC ID."
   type        = string
@@ -85,3 +79,11 @@ variable "aws_node_root_device_type" {
   type        = string
   default     = ""
 }
+
+
+
+
+
+
+
+
