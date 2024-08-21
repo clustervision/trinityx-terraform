@@ -1,11 +1,9 @@
-# TrinityX Terraform Storage Module
+# TrinityX Terraform Storage Module For AWS
 
 - [ ] This module will perform below operation for TrinityX project:
-- [ ] Create Storage Account Unique Name.
-- [ ] Create Storage Account.
-- [ ] Create a Blob Container inside the Storage Account.
-- [ ] Upload a VHD file to the Blob Container inside the Storage Account.
-
+- [ ] Create a S3 Bucket.
+- [ ] Set up the Versioning.
+- [ ] Set up the server side encryption.
+- [ ] Set up the public access for the bucket.
 
 - [ ] For More details for variables, visit the variable file [variables.tf](variables.tf)
-

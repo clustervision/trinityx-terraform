@@ -17,12 +17,14 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/controller/main.tf
+# File: aws/modules/controller/main.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-06-03
-# Description: Terraform module for creating Controller network Interface in Azure,
-#              And The TrinityX Controller on Azure Cloud.
+# Date: 2024-08-09
+# Description: Terraform module for creating EC2 Instance for TrinityX controller
+#              in AWS including fetch the latest AMI ID, get the elastic IP,
+#              create the Network interface, attach the Elastic IP to the Network
+#              Interface, and create the EC2 Instance for the controller.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -35,202 +37,143 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Marketplace Image Agreement
-# This block will accept the Agreement for Azure Marketplace for Controller OS.
+# Get AMI
+# This block will fetch the latest AMI ID depending on the requirements.
 # ------------------------------------------------------------------------------
-# resource "azurerm_marketplace_agreement" "controller_agr" {
-#   publisher = var.azure_controller_os_plan_publisher
-#   offer     = var.azure_controller_os_plan_product
-#   plan      = var.azure_controller_os_plan
-# }
+data "aws_ami" "controller_ami_id" {
+  most_recent = var.aws_controller_ami_latest
 
-# ------------------------------------------------------------------------------
-# SSH Key Generate
-# This block will create SSH Key for Authenticate to Controller.
-# ------------------------------------------------------------------------------
-# resource "tls_private_key" "trinityx" {
-#   algorithm = var.azure_trinityx_ssh_key_algorithm
-#   rsa_bits  = var.azure_trinityx_ssh_key_rsa_bits
-# }
+  filter {
+    name   = var.aws_controller_ami_filter_by
+    values = [var.aws_controller_ami_filter_values]
+  }
 
-# ------------------------------------------------------------------------------
-# SSH Key Store
-# This block will store SSH Key in Azure SSH key to AuthenticateController.
-# ------------------------------------------------------------------------------
-# resource "azurerm_ssh_public_key" "trinityx_key" {
-#   name                = var.azure_trinityx_ssh_key_name
-#   resource_group_name = var.azure_resource_group.name
-#   location            = var.azure_resource_group.location
-#   public_key          = tls_private_key.trinityx.public_key_openssh
-#   tags                = var.azure_trinityx_ssh_key_tags
-
-# }
-
-# ------------------------------------------------------------------------------
-# Virtual Private Network Gateway Public IP Definition
-# This block will be used to get an public IP addresss for VPN.
-# ------------------------------------------------------------------------------
-resource "azurerm_public_ip" "controller_public_ip" {
-  name                = var.azure_controller_controller_public_ip
-  resource_group_name = var.azure_resource_group.name
-  location            = var.azure_resource_group.location
-  allocation_method   = var.azure_controller_public_ip_allocation_method
-  sku                 = var.azure_controller_public_ip_sku
-  zones               = var.azure_controller_public_ip_zones
-  tags                = var.azure_controller_public_ip_tags
+  owners = var.aws_controller_ami_owners
 }
 
 # ------------------------------------------------------------------------------
-# Controller Network Interface Definition
-# This block will create network interface for the TrinityX Controller.
+# AWS Controller Elastic IP
+# This block will get the Elastic IP for the AWS Controller.
 # ------------------------------------------------------------------------------
-resource "azurerm_network_interface" "controller_nic" {
-  name                = var.azure_controller_network_interface
-  resource_group_name = var.azure_resource_group.name
-  location            = var.azure_resource_group.location
+resource "aws_eip" "trinityx_eip" {
+  domain   = var.aws_controller_eip_domain
 
-  ip_configuration {
-    name                          = var.azure_vm_network_ip_name
-    subnet_id                     = var.subnet_id
-    private_ip_address_allocation = var.azure_controller_network_private_ip_allocation
-    private_ip_address            = var.azure_controller_private_ip_address
-    private_ip_address_version    = var.azure_controller_private_ip_address_version
-    public_ip_address_id          = azurerm_public_ip.controller_public_ip.id
+  tags = {
+    Name = "${var.aws_controller_name}-eip"
   }
 
 }
 
 # ------------------------------------------------------------------------------
-# Controller Definition
-# This block will create TrinityX Controller in Azure Cloud.
+# AWS Controller Network Interface
+# This block will create the network interface for the AWS Controller.
 # ------------------------------------------------------------------------------
-resource "azurerm_virtual_machine" "controller" {
-  name                              = var.azure_controller_name
-  resource_group_name               = var.azure_resource_group.name
-  location                          = var.azure_resource_group.location
-  network_interface_ids             = [azurerm_network_interface.controller_nic.id]
-  vm_size                           = var.azure_controller_size
-  delete_os_disk_on_termination     = var.azure_controller_delete_os_disk
-  delete_data_disks_on_termination  = var.azure_controller_delete_data_disk
+resource "aws_network_interface" "trinityx_nic" {
+  subnet_id   = var.public_subnet_id
+  private_ips = [var.aws_controller_ip]
+  security_groups = [var.sg_id]
 
-  storage_image_reference {
-    publisher = var.azure_controller_image_publisher
-    offer     = var.azure_controller_image_offer
-    sku       = var.azure_controller_image_sku
-    version   = var.azure_controller_image_version
+  tags = {
+    Name = "${var.aws_controller_name}-nic"
   }
-
-  storage_os_disk {
-    name              = "${var.azure_controller_name}-osdisk"
-    caching           = var.azure_controller_os_caching
-    create_option     = var.azure_controller_os_create
-    managed_disk_type = var.azure_controller_os_disk_type
-    disk_size_gb      = 64
-  }
-
-  plan {
-    name      = var.azure_controller_os_plan
-    publisher = var.azure_controller_os_plan_publisher
-    product   = var.azure_controller_os_plan_product
-  }
-
-
-  os_profile {
-    computer_name  = var.azure_controller_name
-    admin_username = var.azure_controller_os_username
-    admin_password = var.azure_controller_os_password
-  }
-  
-  os_profile_linux_config {
-    disable_password_authentication = var.azure_controller_disable_auth
-    # ssh_keys {
-    #   key_data  = tls_private_key.trinityx.public_key_openssh
-    #   path      = "/home/${var.azure_controller_os_username}/.ssh/authorized_keys"
-    # }
-  }
-
-  boot_diagnostics {
-    enabled     = true
-    storage_uri = "https://${var.storage_name}.blob.core.windows.net/"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mkdir -p /home/${var.azure_controller_os_username}/.ssh",
-      "sudo mkdir -p /root/.ssh",
-      "sudo touch /home/${var.azure_controller_os_username}/.ssh/authorized_keys",
-      "sudo touch /root/.ssh/authorized_keys",
-      "sudo echo '${var.azure_controller_ssh_public_key_access}' >> /home/${var.azure_controller_os_username}/.ssh/authorized_keys",
-      "sudo echo '${var.azure_controller_ssh_public_key_access}' | sudo tee -a /root/.ssh/authorized_keys",
-      "sudo chmod 700 /home/${var.azure_controller_os_username}/.ssh",
-      "sudo chmod 700 /root/.ssh",
-      "sudo chmod 600 /home/${var.azure_controller_os_username}/.ssh/authorized_keys",
-      "sudo chmod 600 /root/.ssh/authorized_keys"
-    ]
-
-    connection {
-      type     = "ssh"
-      user     = var.azure_controller_os_username
-      password = var.azure_controller_os_password
-      host     = azurerm_public_ip.controller_public_ip.ip_address
-    }
-  }
-
-  # provisioner "file" {
-  #   source      = "scripts/controller-post-install.sh"
-  #   destination = "/home/${var.azure_controller_os_username}/controller-post-install.sh"
-
-  #   connection {
-  #     type        = "ssh"
-  #     user        = var.azure_controller_os_username
-  #     password    = var.azure_controller_os_password
-  #     host        = azurerm_public_ip.controller_public_ip.ip_address
-  #   }
-  # }
-
-  #  provisioner "remote-exec" {
-  #   connection {
-  #     type        = "ssh"
-  #     user        = var.azure_controller_os_username
-  #     password    = var.azure_controller_os_password
-  #     host        = azurerm_public_ip.controller_public_ip.ip_address
-  #   }
-
-  #   inline = [
-  #     "chmod +x /home/${var.azure_controller_os_username}/controller-post-install.sh",
-  #     "sudo sh /home/${var.azure_controller_os_username}/controller-post-install.sh > /home/${var.azure_controller_os_username}/script_output.log 2>&1",
-  #     "sudo grep 'Generated password for user admin:' /home/${var.azure_controller_os_username}/script_output.log | awk '{print $6}' > /home/${var.azure_controller_os_username}/admin_password.txt",
-  #     "sudo luna node rename node001 azvm001",
-  #     "sudo luna node rename node002 azvm002",
-  #     "sudo luna node rename node003 azvm003",
-  #     "sudo luna node rename node004 azvm004",
-  #     # "sudo luna group change compute -qko 'rootdelay=300 console=ttyS0 earlyprintk=ttyS0 no_timer_check net.ifnames=0'",
-  #     "sudo luna osimage change compute -qo 'rootdelay=300 console=ttyS0 earlyprintk=ttyS0 no_timer_check net.ifnames=0'",
-  #     "sudo luna group change compute -qpart /tmp/partscript.txt -qpost /tmp/postscript.txt"
-  #   ]
-  # }
-
-  # provisioner "local-exec" {
-  #   command = <<EOT
-  #   sshpass -p '${var.azure_controller_os_password}' ssh ${var.azure_controller_os_username}@${azurerm_public_ip.controller_public_ip.ip_address} -o StrictHostKeyChecking=no "cat /home/${var.azure_controller_os_username}/admin_password.txt"
-  #   EOT
-  # }
 
 }
 
 # ------------------------------------------------------------------------------
-# Setup TrinityX Definition
-# This block will setup TrinityX in Azure Controller Cloud.
+# Attach Elastic IP
+# This block will attach the Elastic IP to the Network Interface of AWS Controller.
 # ------------------------------------------------------------------------------
-# resource "null_resource" "wait_for_post_install" {
-#   depends_on = [azurerm_virtual_machine.controller]
+resource "aws_eip_association" "trinityx_eip_association" {
+  allocation_id        = aws_eip.trinityx_eip.id
+  network_interface_id = aws_network_interface.trinityx_nic.id
+}
 
-#   provisioner "local-exec" {
-#     command = <<EOT
-#     ssh ${var.azure_controller_os_username}@${azurerm_public_ip.controller_public_ip.ip_address} -o StrictHostKeyChecking=no << EOF
-#     while pgrep -f controller-post-install.sh > /dev/null; do sleep 5; done
-#     EOF
-#     EOT
-#   }
-# }
+# ------------------------------------------------------------------------------
+# AWS Controller
+# This block will create the AWS EC2 Instance for TrinityX Controller and do
+# some initial setups.
+# ------------------------------------------------------------------------------
+resource "aws_instance" "controller" {
+  ami           = data.aws_ami.controller_ami_id.id
+  instance_type = var.aws_controller_instance_type
+
+  network_interface {
+    device_index          = 0
+    network_interface_id  = aws_network_interface.trinityx_nic.id
+  }
+
+  root_block_device {
+    volume_size = var.aws_controller_root_device_size
+    volume_type = var.aws_controller_root_device_type
+  }
+
+  user_data = <<-EOF
+  #!/bin/bash
+
+  # Set root password
+  echo "root:${var.aws_controller_os_password}" | chpasswd
+
+  # Enable root login via SSH
+  sed -i 's/^PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  systemctl restart sshd
+
+  # Create the ${var.aws_controller_os_username} user with a home directory
+  useradd -m -s /bin/bash ${var.aws_controller_os_username}
+
+  # Set the password for the ${var.aws_controller_os_username} user
+  echo "${var.aws_controller_os_username}:${var.aws_controller_os_password}" | chpasswd
+
+  # Enable SSH access for the ${var.aws_controller_os_username} user
+  mkdir -p /home/${var.aws_controller_os_username}/.ssh
+  chmod 700 /home/${var.aws_controller_os_username}/.ssh
+  touch /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+  chmod 600 /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+  chown -R ${var.aws_controller_os_username}:${var.aws_controller_os_username} /home/${var.aws_controller_os_username}/.ssh
+
+  # Add public SSH key to authorized_keys (replace with your actual public key)
+  echo "${var.aws_controller_ssh_public_key} TrinityX" >> /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+
+  # Grant sudo privileges to ${var.aws_controller_os_username} without a password
+  echo "${var.aws_controller_os_username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+  echo "+--------------------------------------------------------------------------+"
+  echo "Resizing the Root Partition"
+
+  DISK="/dev/nvme0n1"
+  PARTITION="/dev/nvme0n1p5"
+  VG_NAME="rocky"
+  LV_NAME="/dev/mapper/rocky-lvroot"
+  FILESYSTEM="xfs"
+
+  if [ "$EUID" -ne 0 ]; then
+      echo "Please run as root"
+      exit 1
+  fi
+
+  echo -e "n\n\n\n\n\nt\n\n8e\nw" | fdisk $DISK
+  partprobe $DISK
+  pvcreate $PARTITION
+  vgextend $VG_NAME $PARTITION
+  lvextend -l +100%FREE $LV_NAME
+  if [ "$FILESYSTEM" == "xfs" ]; then
+      xfs_growfs /
+  elif [ "$FILESYSTEM" == "ext4" ]; then
+      resize2fs $LV_NAME
+  else
+      echo "Unsupported filesystem type. Please use xfs or ext4."
+      exit 1
+  fi
+  echo "Root partition successfully resized."
+  echo "+--------------------------------------------------------------------------+"
+
+  EOF
+
+  tags = {
+    Name = var.aws_controller_name
+  }
+
+  depends_on = [aws_eip_association.trinityx_eip_association]
+}
+
+
 

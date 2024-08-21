@@ -17,10 +17,10 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/network/outputs.tf
+# File: aws/modules/network/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
+# Date: 2024-08-06
 # Description: Terraform Network Module Outputs file, will be output some of
 #              important information, will be used further.
 # Version: 1.0.0
@@ -31,19 +31,29 @@
 # - This output file outputs the network related information.
 # ------------------------------------------------------------------------------
 
-output "subnet_id" {
-  value       = azurerm_subnet.subnet[0].id
-  description = "The ID of the subnet created in the network module"
+output "vpc_id" {
+  value = aws_vpc.trinityx.id
+  description = "The ID of the VPC created in the network module"
 }
 
-output "nsg_id" {
-  value       = azurerm_network_security_group.nsg.id
-  description = "The ID of the Network Security Group created in the network module"
+output "public_subnet_id" {
+  value = aws_subnet.public_subnet.id
+  description = "The ID of the public subnet created in the network module"
 }
 
-output "vnet_id" {
-  value       = azurerm_virtual_network.vnet.id
-  description = "The ID of the Virtual Network created in the network module"
+output "internet_gateway_id" {
+  value = aws_internet_gateway.igw.id
+  description = "The ID of the internet gateway created in the network module"
+}
+
+output "route_table_id" {
+  value = aws_route_table.public_rt.id
+  description = "The ID of the routing table created in the network module"
+}
+
+output "sg_id" {
+  value = aws_security_group.vpn_sg.id
+  description = "The ID of the security group created in the network module"
 }
 
 

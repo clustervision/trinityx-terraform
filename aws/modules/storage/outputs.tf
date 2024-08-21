@@ -17,43 +17,33 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/storage/outputs.tf
+# File: aws/modules/storage/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform Sotrage Account, Container, and VHD Outputs file. It will
-#              output storage account and VHD information, will be used further.
+# Date: 2024-08-08
+# Description: Terraform storage Module Outputs file, will be output some of
+#              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - This output file outputs the Sotrage related information.
+# - This output file outputs the storage(S3) related information.
 # ------------------------------------------------------------------------------
 
-output "storage_name" {
-  value       = azurerm_storage_account.storage.name
-  description = "The Name of the Storage Account"
+output "bucket_name" {
+  value       = aws_s3_bucket.trinityx_bucket.bucket
+  description = "The AWS S3 Bucket Name for the TrinityX."
 }
 
-output "storage_id" {
-  value       = azurerm_storage_account.storage.id
-  description = "The ID of the Storage Account"
+output "bucket_arn" {
+  value       = aws_s3_bucket.trinityx_bucket.arn
+  description = "The AWS S3 Bucket ARN for the TrinityX."
 }
 
-output "container_id" {
-  value       = azurerm_storage_container.container.id
-  description = "The ID of the Storage Account Container"
-}
 
-output "vhd_id" {
-  value       = azurerm_storage_blob.vhd.id
-  description = "The ID of the Uploaded VHD in Storage Account Container"
-}
 
-output "vhd_url" {
-  value       = azurerm_storage_blob.vhd.url
-  description = "The URL of the Uploaded VHD in Storage Account Container"
-}
+
+
 
 

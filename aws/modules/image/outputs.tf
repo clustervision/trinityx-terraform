@@ -17,43 +17,26 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/image/outputs.tf
+# File: aws/modules/image/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform Image Outputs file. It will output Image related info.
+# Date: 2024-08-06
+# Description: Terraform image Module Outputs file, will be output some of
+#              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - This output file outputs the Image related information.
+# - This output file outputs the image related information.
 # ------------------------------------------------------------------------------
 
-output "image_id" {
-  value       = azurerm_image.compute_image.id
-  description = "The ID of the Azure Image"
+output "object_url" {
+  value       = "s3://${var.bucket_name}/${aws_s3_object.compute_image.key}"
+  description = "The S3 URL for the VHD."
 }
 
-# output "gallery_id" {
-#   value       = azurerm_shared_image_gallery.gallery.id
-#   description = "The ID of the Azure Compute Gallery"
-# }
-
-# output "shared_image_id" {
-#   value       = azurerm_shared_image.shared_image.id
-#   description = "The ID of the Shared Image within Azure Compute Gallery"
-# }
-
-# output "image_version_id" {
-#   value       = azurerm_shared_image_version.image_version.id
-#   description = "The ID of the Version for Shared Image within Azure Compute Gallery"
-# }
-
-
-
-
-
-
-
-
+output "ami_id" {
+  value       = data.local_file.ami_id.content
+  description = "The AMI ID."
+}

@@ -17,10 +17,10 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/main.tf
+# File: aws/main.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
+# Date: 2024-08-05
 # Description: Variables file for the main Terraform configuration for TrinityX.
 # Version: 1.0.0
 # Status: Development
@@ -33,1267 +33,726 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------ #
-# Azure Cloud Modules
-variable "azure_network" {
-  description = "The Azure Networks."
+# AWS Cloud Modules
+variable "aws_network" {
+  description = "The AWS Network(VPC)."
   type        = bool
   default     = false
 }
 
-variable "azure_vpn" {
-  description = "The Azure VPN."
+variable "aws_vpn" {
+  description = "The AWS VPN."
   type        = bool
   default     = false
 }
 
-variable "azure_storage" {
-  description = "The Azure Storage Account."
+variable "aws_storage" {
+  description = "The AWS Storage S3."
   type        = bool
   default     = false
 }
 
-variable "azure_images" {
-  description = "The Azure OS Image (VHD)."
+variable "aws_image" {
+  description = "The AWS OS Image (VHD)."
   type        = bool
   default     = false
 }
 
-variable "azure_controller" {
-  description = "The Azure Controller."
+
+variable "aws_controller" {
+  description = "The AWS Controller."
   type        = bool
   default     = false
 }
 
-variable "azure_node" {
-  description = "The Azure Node"
+variable "aws_node" {
+  description = "The AWS Node"
   type        = bool
   default     = false
 }
 
-# Azure Cloud Modules
+# AWS Cloud Modules
 # ------------------------------------------------------------------------------ #
 
 # ------------------------------------------------------------------------------ #
-# Azure Cloud Credentials
-variable "azure_subscription_id" {
-  description = "The Subscription ID for Azure"
+# AWS Cloud Credentials
+variable "aws_region" {
+  description = "The AWS Region for the Installation"
+  type        = string
+  default     = "eu-central-1"
+
+  validation {
+    condition     = length(var.aws_region) >= 9
+    error_message = "The AWS Region must be a valid Region."
+  }
+}
+
+variable "access_key" {
+  description = "The AWS Access Key"
   type        = string
   default     = ""
 
   validation {
-    condition     = length(var.azure_subscription_id) == 36
-    error_message = "The Azure Subscription ID must be a valid subscription_id"
+    condition     = length(var.access_key) == 20
+    error_message = "The AWS Access Key must be a valid Access Key"
   }
 }
 
-variable "azure_client_id" {
-  description = "The Client ID for Azure"
+variable "secret_key" {
+  description = "The AWS Secret Key"
   type        = string
+  # sensitive   = true
   default     = ""
-}
 
-variable "azure_client_secret" {
-  description = "The Client Secret for Azure"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "azure_tenant_id" {
-  description = "The Tenant ID for Azure"
-  type        = string
-  default     = ""
-}
-# Azure Cloud Credentials
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Resource Group & Location
-
-variable "azure_resource_group" {
-  description = "The Azure Resource Group Name"
-  type        = string
-  default     = ""
-}
-
-variable "azure_resource_group_tag" {
-  description = "The Azure Resource Group Tags"
-  type    = map(string)
-  default = {
-    HPC = "TrinityX"
-  }
-}
-
-variable "azure_location" {
-  description = "The Azure Resource Group Location"
-  type        = string
-  default     = "Germany West Central"
-}
-
-# Azure Resource Group & Location
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Network Service Group & Rules
-variable "azure_nsg" {
-  description = "The name of the Network Security Group"
-  type        = string
-  default     = "TrinityX-NSG"
   validation {
-    condition     = length(var.azure_nsg) > 1 && length(var.azure_nsg) < 65
-    error_message = "The Azure Network Security Group Name must be between 2 and 64 characters."
+    condition     = length(var.secret_key) == 40
+    error_message = "The AWS Secret Key must be a valid Secret Key"
   }
 }
 
-variable "azure_nsg_tags" {
-  description = "The Tags for the Network Security Group"
-  type    = map(string)
-  default = {
-    HPC = "TrinityX",
-    module = "network",
-    sub-module = "security group"
-  }
+# AWS Cloud Credentials
+# ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS VPC
+variable "aws_vpc_name" {
+  description = "The AWS Network(VPC)."
+  type        = string
+  default     = ""
 }
 
-variable "azure_nsg_security_rules" {
+variable "aws_vpc_cidr_block" {
+  description = "The AWS VPN."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_instance_tenancy" {
+  description = "The AWS OS Image (VHD)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_enable_dns_support" {
+  description = "The AWS Controller."
+  type        = bool
+  default     = false
+}
+
+variable "aws_vpc_enable_dns_hostnames" {
+  description = "The AWS Node"
+  type        = bool
+  default     = false
+}
+
+variable "aws_vpc_subnet_name" {
+  description = "The AWS VPC Subnet Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_subnet_cidr_block" {
+  description = "The AWS VPC Subnet CIDR Block."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_internet_gateway_name" {
+  description = "The AWS VPC Internet Gateway Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_route_table_cidr_block" {
+  description = "The AWS Route Table CIDR Block."
+  type        = string
+  default     = ""
+}
+
+variable "aws_route_table_name" {
+  description = "The AWS Route Table Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_network_acl_name" {
+  description = "The AWS Network Access Control List Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_network_acl_rules" {
   description = "List of ports to allow"
   type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-    description                = string
+    direction   = string
+    protocol    = string
+    rule_no     = number
+    action      = string
+    cidr_block  = string
+    from_port   = number
+    to_port     = number
   }))
   default = [
     {
-      name                       = "Allow-SSH"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 22 for SSH."
+      direction  = "egress"
+      protocol   = "udp"
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 500
+      to_port    = 500
     },
     {
-      name                       = "Allow-HTTP"
-      priority                   = 200
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 80 for Nginx."
+      direction  = "egress"
+      protocol   = "udp"
+      rule_no    = 110
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 4500
+      to_port    = 4500
     },
     {
-      name                       = "Allow-HTTPS"
-      priority                   = 300
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 443 for SSL."
+      direction  = "ingress"
+      protocol   = "udp"
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 500
+      to_port    = 500
     },
     {
-      name                       = "Allow-HTTP-Alt"
-      priority                   = 400
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "8080"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 8080 for OOD."
-    },
-    {
-      name                       = "Allow-Custom-1"
-      priority                   = 500
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7050"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7050 for Lunqa2 Daemon."
-    },
-    {
-      name                       = "Allow-Custom-2"
-      priority                   = 600
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7055"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7055 for Nginx."
-    },
-    {
-      name                       = "Allow-Custom-3"
-      priority                   = 700
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7051"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7051 for Nginx."
-    },
-    {
-      name                       = "Allow-TFTP"
-      priority                   = 800
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "69"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 69 for TFTP."
-    },
-    {
-      name                       = "Allow-WireGuard"
-      priority                   = 900
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "51820"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 51820 for TFTP."
-    },
-    {
-      name                       = "Allow-SSH-Out"
-      priority                   = 1000
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 22 for SSH."
-    },
-    {
-      name                       = "Allow-HTTP-Out"
-      priority                   = 1100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 80 for Nginx."
-    },
-    {
-      name                       = "Allow-HTTPS-Out"
-      priority                   = 1200
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 443 for SSL."
-    },
-    {
-      name                       = "Allow-HTTP-Alt-Out"
-      priority                   = 1300
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "8080"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 8080 for OOD."
-    },
-    {
-      name                       = "Allow-Custom-1-Out"
-      priority                   = 1400
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7050"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7050 for Lunqa2 Daemon."
-    },
-    {
-      name                       = "Allow-Custom-2-Out"
-      priority                   = 1500
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7055"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7055 for Nginx."
-    },
-    {
-      name                       = "Allow-Custom-3-Out"
-      priority                   = 1600
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7051"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7051 for Nginx."
-    },
-    {
-      name                       = "Allow-TFTP-Out"
-      priority                   = 1700
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "69"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 69 for TFTP."
-    },
-    {
-      name                       = "Allow-WireGuard-Out"
-      priority                   = 1800
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "51820"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 51820 for TFTP."
+      direction  = "ingress"
+      protocol   = "udp"
+      rule_no    = 110
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 4500
+      to_port    = 4500
     }
   ]
 }
-# Azure Network Service Group & Rules
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Virtual Network, Address Space, Subnets
-variable "azure_virtual_network" {
-  description = "The name of the Virtual Network"
+variable "aws_security_group_name" {
+  description = "The AWS security group name."
   type        = string
-  default     = "TrinityX-Vnet"
+  default     = ""
 }
 
-variable "azure_virtual_network_tags" {
-  description = "The Tags for the Virtual Network"
-  type    = map(string)
-  default = {
-    HPC = "TrinityX",
-    module = "network",
-    sub-module = "virtual network"
-  }
-}
-
-variable "azure_virtual_network_encryption" {
-  description = "The Virtual Network Encryption"
-  type        = string
-  default     = "AllowUnencrypted"
-}
-
-variable "azure_virtual_network_address_space" {
-  description = "The address spcae for the Virtual Network"
-  type        = list
-  default     = [
-    "10.1.0.0/16"    
-  ]
-}
-
-variable "azure_virtual_network_subnets" {
-  description = "The Subnets for the Virtual Network"
-  type        = list(object({
-    name                  = string
-    address_prefix        = string
-    security_group        = string
+variable "aws_security_group_rules" {
+  description = "List of ports to allow"
+  type = list(object({
+    direction   = string
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+    description = string
+    
   }))
-  default     = [
-    {"name": "cluster",   "address_prefix": "10.1.0.0/24", "security_group": "TrinityX-NSG"}   
+  default = [
+    {
+      direction   = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 500
+      to_port     = 500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 4500
+      to_port     = 4500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
+    },
+    {
+      direction   = "egress"
+      from_port   = 500
+      to_port     = 500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
+    },
+    {
+      direction   = "egress"
+      from_port   = 4500
+      to_port     = 4500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow SSH"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTP"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTPS"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow OOD 8080"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 7050
+      to_port     = 7050
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7050"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 7051
+      to_port     = 7051
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7051"
+    }
   ]
 }
-
-# Azure Virtual Network, Address Space, Subnets
+# AWS VPC
 # ------------------------------------------------------------------------------ #
 
 # ------------------------------------------------------------------------------ #
-# Azure Virtual Network [Gateway Subnet], Virtual Network Gateway, Local Network Gatewat.
-variable "azure_virtual_network_gateway_subnet" {
-  description = "The name of the Network Security Group"
-  type        = object({
-    name                  = string
-    address_prefix        = string
-    security_group        = string
-  })
-  default     = {"name": "GatewaySubnet", "address_prefix": "10.1.255.0/27", "security_group": null}
-}
-
-variable "azure_local_network_gateway" {
-  description = "The name of the Local Network Gateway"
-  type        = string
-  default     = "TrinityXLNG"
-}
-
-variable "azure_local_network_gateway_tags" {
-  description = "The Tags for the Local Network Gateway"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX",
-    module     = "network",
-    sub-module = "local network gateway"
-  }
-}
-
-variable "azure_local_network_gateway_ip_address" {
-  description = "The IP Address for the Local Network Gateway"
+# AWS VPN
+variable "aws_customer_gateway_name" {
+  description = "The AWS customer gateway name."
   type        = string
   default     = ""
 }
 
-variable "azure_local_network_gateway_address_space" {
-  description = "The Address Space for the Local Network Gateway"
-  type        = list
-  default     = ["192.168.20.0/24"]
+variable "aws_customer_gateway_bgp_asn" {
+  description = "The AWS customer gateway Border Gateway Protocol Autonomous System Numbe ."
+  type        = number
+  default     = 65000
 }
 
-variable "azure_local_network_gateway_bgp_asn" {
-  description = "The Local Network Gateway BGP ASN"
+variable "aws_customer_gateway_ip_address" {
+  description = "The AWS customer gateway internet-routable IP."
+  type        = string
+  default     = ""
+}
+
+variable "aws_customer_gateway_type" {
+  description = "The AWS customer gateway type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_gateway_name" {
+  description = "The AWS VPN gateway name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_name" {
+  description = "The AWS VPN name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_connection_type" {
+  description = "The AWS VPN connection type name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_static_routes_only" {
+  description = "The AWS VPN static route only flag."
+  type        = bool
+  default     = true
+}
+
+variable "aws_vpn_local_ipv4_network_cidr" {
+  description = "The AWS VPN local IPv4 CIDR."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_remote_ipv4_network_cidr" {
+  description = "The AWS VPN remote IPv4 CIDR."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpn_connection_route_cidr_block" {
+  description = "The AWS VPN connection route destination CIDR block."
+  type        = string
+  default     = ""
+}
+
+# AWS VPN
+# ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS S3
+variable "aws_s3_bucket_prefix" {
+  description = "The name prefix for the AWS S3 bucket."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_force_destroy" {
+  description = "The AWS S3 bucket force destroy."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_bucket_name_tag" {
+  description = "The AWS S3 bucket name tag."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_env" {
+  description = "TheAWS S3 bucket environment."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_versioning" {
+  description = "The AWS S3 bucket Versioning."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_enc_algorithm" {
+  description = "The AWS S3 bucket encryption algorithm."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_bucket_key" {
+  description = "The AWS S3 bucket ey enablement."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_block_public_acls" {
+  description = "The AWS S3 bucket block public ACL."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_block_public_policy" {
+  description = "The AWS S3 bucket bloc public policy."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_ignore_public_acls" {
+  description = "The AWS S3 bucket ignore public ACL."
+  type        = bool
+  default     = false
+}
+
+variable "aws_s3_restrict_public_buckets" {
+  description = "The AWS S3 bucket restrict public buckets."
+  type        = bool
+  default     = false
+}
+# AWS S3
+# ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS Image
+variable "aws_s3_object_key_path" {
+  description = "The AWS S3 Object key(remote path)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_source" {
+  description = "The AWS S3 Object Source(local path)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_content_type" {
+  description = "The AWS S3 Object content type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_s3_object_encryption" {
+  description = "The AWS S3 Object encryption."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_name" {
+  description = "The AWS IAM role name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_version" {
+  description = "The AWS IAM role policy version."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_effect" {
+  description = "The AWS IAM role policy effect."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_service" {
+  description = "The AWS IAM role policy service."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_action" {
+  description = "The AWS IAM role policy action."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_ec2_access" {
+  description = "The AWS IAM role policy EC2 Access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_ec2_role" {
+  description = "The AWS IAM role policy EC2 Role for SSM."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_s3_access" {
+  description = "The AWS IAM role policy S3 Access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_iam_role_policy_s3_read" {
+  description = "The AWS IAM role policy S3 read-only access."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_license_type" {
+  description = "The AWS AMI image license type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_boot_mode" {
+  description = "The AWS AMI image boot mode."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_description" {
+  description = "The AWS AMI image description."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_platform" {
+  description = "The AWS AMI image platform."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_role" {
+  description = "The AWS AMI image role for import."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_container_format" {
+  description = "The AWS AMI image container format."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_containe_desc" {
+  description = "The AWS AMI image container description."
+  type        = string
+  default     = ""
+}
+# AWS Image
+# ------------------------------------------------------------------------------ #
+
+# ------------------------------------------------------------------------------ #
+# AWS Controller
+# ------------------------------------------------------------------------------ #
+variable "aws_controller_ami_latest" {
+  description = "The AWS AMI most recent flag."
+  type        = bool
+  default     = false
+}
+
+variable "aws_controller_ami_filter_by" {
+  description = "The AWS AMI filter by."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ami_filter_values" {
+  description = "The AWS AMI filter values."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ami_owners" {
+  description = "The AWS AMI owners."
+  type        = list(string)
+  default     = []
+}
+
+variable "aws_controller_instance_type" {
+  description = "The AWS controller instance type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_automatic_public_ip" {
+  description = "The AWS controller automatic association of public IP."
+  type        = bool
+  default     = false
+}
+
+variable "aws_controller_root_device_size" {
+  description = "The AWS controller root block device size in GB."
   type        = number
   default     = 0
 }
 
-variable "azure_local_network_gateway_bgp_peering_address" {
-  description = "The Local Network Gateway BGP Peering Address."
+variable "aws_controller_root_device_type" {
+  description = "The AWS controller root block device type(HDD, SSD, or Magnetic)."
   type        = string
   default     = ""
 }
 
-variable "azure_local_network_gateway_bgp_peer_weight" {
-  description = "The Local Network Gateway BGP Peering Weight."
+variable "aws_controller_name" {
+  description = "The AWS controller name tag."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ip" {
+  description = "The AWS controller IP address."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_eip_domain" {
+  description = "The AWS controller elastic IP domain."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_ssh_public_key" {
+  description = "The public SSH key for AWS controller."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_os_username" {
+  description = "The AWS controller username."
+  type        = string
+  default     = ""
+}
+
+variable "aws_controller_os_password" {
+  description = "The AWS controller password."
+  type        = string
+  default     = ""
+}
+
+# ------------------------------------------------------------------------------ #
+# AWS Node
+variable "aws_hostlist" {
+  description = "List of AWS nodes in the format aws[001-004]"
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_instance_type" {
+  description = "The AWS Node instance type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_automatic_public_ip" {
+  description = "The AWS node automatic association of public IP."
+  type        = bool
+  default     = false
+}
+
+variable "aws_node_root_device_size" {
+  description = "The AWS node root block device size in GB."
   type        = number
   default     = 0
 }
 
-variable "azure_vpn_public_ip" {
-  description = "The Public IP Address for the VPN"
-  type        = string
-  default     = "TrinityXVNGIP"
-}
-
-variable "azure_vpn_public_ip_tags" {
-  description = "The Tags for the Public IP Address for the VPN"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX",
-    module     = "network",
-    sub-module = "virtual network gateway"
-  }
-}
-
-variable "azure_vpn_public_ip_allocation_method" {
-  description = "The IP Address Allocation Method for the VPN Public IP"
-  type        = string
-  default     = "Static"
-}
-
-variable "azure_vpn_public_ip_sku" {
-  description = "The SKU for VPN Public IP"
-  type        = string
-  default     = "Standard"
-}
-
-variable "azure_vpn_public_ip_zones" {
-  description = "The Zones for the VPN Public IP"
-  type        = list
-  default     = ["1", "2", "3"]
-}
-
-variable "azure_virtual_network_gateway" {
-  description = "The Name of the Virtual Network Gateway"
-  type        = string
-  default     = "TrinityXVNG"
-}
-
-variable "azure_virtual_network_gateway_tags" {
-  description = "The Tags for the Virtual Network Gateway"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX",
-    module     = "network",
-    sub-module = "virtual network gateway"
-  }
-}
-
-variable "azure_virtual_network_gateway_type" {
-  description = "The gateway type for the Virtual Network Gateway"
-  type        = string
-  default     = "Vpn"
-}
-
-variable "azure_virtual_network_gateway_vpn_type" {
-  description = "The VPN type for the Virtual Network Gateway"
-  type        = string
-  default     = "RouteBased"
-}
-
-variable "azure_virtual_network_gateway_sku" {
-  description = "The gateway SKU for the Virtual Network Gateway"
-  type        = string
-  default     = "VpnGw2"
-}
-
-variable "azure_virtual_network_gateway_generation" {
-  description = "The Generation for the Virtual Network Gateway"
-  type        = string
-  default     = "Generation2"
-}
-
-variable "azure_virtual_network_gateway_bgp_nat" {
-  description = "The gateway BGP NAT routing for the Virtual Network Gateway"
-  type        = bool
-  default     = false
-}
-
-variable "azure_virtual_network_gateway_active_active" {
-  description = "The Active-Active mode for the Virtual Network Gateway"
-  type        = bool
-  default     = false
-}
-
-variable "azure_virtual_network_gateway_bgp" {
-  description = "The BGP Enabled for the Virtual Network Gateway"
-  type        = bool
-  default     = false
-}
-
-variable "azure_virtual_network_gateway_address_space" {
-  description = "The Gateway Address Space for the Virtual Network Gateway"
-  type        = list
-  default     = ["192.168.20.0/24"]
-}
-
-variable "azure_virtual_network_gateway_ip_config_name" {
-  description = "The IP Configuration name for the Virtual Network Gateway"
-  type        = string
-  default     = "GatewayIpConfig"
-}
-
-variable "azure_virtual_network_gateway_private_allocation" {
-  description = "The Private IP Allocation for the Virtual Network Gateway"
-  type        = string
-  default     = "Dynamic"
-}
-
-variable "azure_virtual_network_gateway_connection" {
-  description = "The Connection name for the Virtual Network Gateway"
-  type        = string
-  default     = "azureconn"
-}
-
-variable "azure_virtual_network_gateway_connection_tags" {
-  description = "The Tags for the Virtual Network Gateway"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX",
-    module     = "network",
-    sub-module = "local-vertual network gateway connection"
-  }
-}
-
-variable "azure_virtual_network_gateway_connection_type" {
-  description = "The Connection type for the Virtual Network Gateway"
-  type        = string
-  default     = "IPsec"
-}
-
-variable "azure_virtual_network_gateway_connection_mode" {
-  description = "The Connection mode for the Virtual Network Gateway"
-  type        = string
-  default     = "Default"
-}
-
-variable "azure_virtual_network_gateway_connection_shared_key" {
-  description = "The Shared Key for the connection for Virtual Network Gateway"
+variable "aws_node_root_device_type" {
+  description = "The AWS node root block device type(HDD, SSD, or Magnetic)."
   type        = string
   default     = ""
 }
-# Azure Virtual Network [Gateway Subnet], Virtual Network Gateway, Local Network Gatewat.
 # ------------------------------------------------------------------------------ #
 
 # ------------------------------------------------------------------------------ #
-# Azure Storage Account, Blob Container, VHD Upload, Azure Image, Shared Image Gallery & Versioning.
-variable "azure_storage_account" {
-  description = "The Account Name for Azure Storage Account"
+# AWS Import Variables
+variable "ami_id" {
+  description = "The AWS AMI ID from the Import."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_account_tag" {
-  description = "The Tags for the Storage Account"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "storage",
-    sub-module = "account"
-  }
-}
-
-variable "azure_storage_account_kind" {
-  description = "The Account kind for Azure Storage Account"
+variable "vpc_id" {
+  description = "The AWS VPC ID from the Import."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_account_tier" {
-  description = "The Account Tier for Azure Storage Account"
+variable "public_subnet_id" {
+  description = "The AWS Public Subnet ID from the Import."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_replication_type" {
-  description = "The Replication Type for Azure Storage Account"
+variable "sg_id" {
+  description = "The AWS Security Group ID from the Import."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_access_tier" {
-  description = "The Access Tier for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_min_tls" {
-  description = "The Minimum TLS for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_https_traffic" {
-  description = "The HTTPS traffic for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_access_key" {
-  description = "The Access Key for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_public_network" {
-  description = "The Public network access for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_oauth" {
-  description = "The OAuth for Azure Storage Account"
-  type        = bool
-  default     = false
-}
-
-variable "azure_storage_hns" {
-  description = "The Hierarchical namespace for Azure Storage Account"
-  type        = bool
-  default     = false
-}
-
-variable "azure_storage_nfsv3" {
-  description = "The NFS V3 for Azure Storage Account"
-  type        = bool
-  default     = false
-}
-
-variable "azure_storage_blob_versioning" {
-  description = "The Blob Versioning for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-variable "azure_storage_blob_change_feed" {
-  description = "The Blob Change Feed for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_retain_deleted_blobs" {
-  description = "The Retain Deleted Blobs for Azure Storage Account"
-  type        = number
-  default     = 7
-}
-# Azure Storage Account, Blob Container, VHD Upload, Azure Image, Shared Image Gallery & Versioning.
+# AWS Import Variables
 # ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Storage Account Container
-variable "azure_storage_container" {
-  description = "The Container Name for the Azure Storage Account"
-  type        = string
-  default     = "trinityx-images"
-}
-
-variable "azure_storage_container_access_type" {
-  description = "The Container Access Type for the Azure Storage Account"
-  type        = string
-  default     = "private"
-}
-# Azure Storage Account Container
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Storage Storage Blob VHD
-variable "azure_vhd" {
-  description = "The name of the storage blob"
-  type        = string
-  default     = "azure.vhd"
-}
-
-variable "azure_vhd_type" {
-  description = "The type of the storage blob"
-  type        = string
-  default     = "Page"
-}
-
-variable "azure_vhd_file_path" {
-  description = "The local path to the VHD file"
-  type        = string
-  default     = "/trinity/images/azure.vhd"
-}
-
-variable "azure_vhd_access_tier" {
-  description = "The access tier for the VHD file"
-  type        = string
-  default     = "Hot"
-}
-# Azure Storage Storage Blob VHD
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Image
-variable "azure_image" {
-  description = "The Name for Azure Image"
-  type        = string
-  default     = "TrinityX-Compute"
-}
-
-variable "azure_image_tags" {
-  description = "The Tags for the Azure Image"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "vhd"
-  }
-}
-
-variable "azure_image_zone_resilient" {
-  description = "The zone resiliency for Azure Image"
-  type        = bool
-  default     = true
-}
-
-variable "azure_image_hyper_v_generation" {
-  description = "The HyperV Generation Type for Azure Image"
-  type        = string
-  default     = "V2"
-}
-
-variable "azure_image_os_type" {
-  description = "The operating system type for Azure Image"
-  type        = string
-  default     = "Linux"
-}
-
-variable "azure_image_os_state" {
-  description = "The operating system state for Azure Image"
-  type        = string
-  default     = "Generalized"
-}
-
-variable "azure_image_cachinge" {
-  description = "The caching mode for Azure Image"
-  type        = string
-  default     = "ReadWrite"
-}
-# Azure Image
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery
-variable "azure_compute_gallery" {
-  description = "The Account Name for Azure Compute Gallery"
-  type        = string
-  default     = "TrinityXGallery"
-}
-
-variable "azure_compute_gallery_tags" {
-  description = "The Tags for the Azure Compute Gallery"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery"
-  }
-}
-
-variable "azure_compute_gallery_description" {
-  description = "The Account Name for Azure Compute Gallery"
-  type        = string
-  default     = "This is TrinityX Image Gallery. Here you can attach your own OS Images and share depends on your need."
-}
-
-variable "azure_compute_gallery_sharing" {
-  description = "The Account Name for Azure Storage Account"
-  type        = string
-  default     = "Private"
-}
-# Azure Compute Gallery
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery Image
-variable "azure_shared_image" {
-  description = "The Name for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "TrinityX-Compute"
-}
-
-variable "azure_shared_image_tags" {
-  description = "The Tags for the Shared Image within a Shared Image Gallery"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery shared"
-  }
-}
-
-variable "azure_shared_image_os_type" {
-  description = "The operating system type for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "Linux"
-}
-
-variable "azure_shared_image_trusted_launch" {
-  description = "The Trusted Launch for Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = true
-}
-
-variable "azure_shared_image_hyper_v_generation" {
-  description = "The HyperV Generation forShared Image within a Shared Image Gallery"
-  type        = string
-  default     = "V2"
-}
-
-variable "azure_shared_accelerated_network" {
-  description = "The Accelerated Network for Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = true
-}
-
-variable "azure_shared_architecture" {
-  description = "The Architecture for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "x64"
-}
-
-variable "azure_shared_image_publisher" {
-  description = "The Publisher for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "TrinityX"
-}
-
-variable "azure_shared_image_offer" {
-  description = "The Offers for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "HPC"
-}
-
-variable "azure_shared_image_sku" {
-  description = "The SKU for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "iPXE-GRUB"
-}
-# Azure Compute Gallery Image
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery Image Version
-variable "azure_shared_image_version" {
-  description = "The Version for Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "0.0.1"
-}
-
-variable "azure_shared_image_version_tags" {
-  description = "The Tags for the Version of a Shared Image within a Shared Image Gallery"
-  type        = map(string)
-  default     = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery version"
-  }
-}
-
-variable "azure_shared_image_version_replication_mode" {
-  description = "The Replication Mode for Version of a Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "Full"
-}
-
-variable "azure_shared_image_version_regional_replica_count" {
-  description = "The Account Name for Version of a Shared Image within a Shared Image Gallery"
-  type        = number
-  default     = 1
-}
-
-variable "azure_shared_image_version_latest" {
-  description = "Exclude from Latest for Version of a Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = false
-}
-
-variable "azure_shared_image_version_storage_account_type" {
-  description = "The Account Name for Version of a Shared Image within a Shared Image Gallery"
-  type        = string
-  default     = "Standard_ZRS"
-}
-# Azure Compute Gallery Image Version
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Controller
-variable "azure_trinityx_ssh_key_algorithm" {
-  description = "The Algorithm for SSH Key"
-  type        = string
-  default     = "RSA"
-}
-
-variable "azure_trinityx_ssh_key_rsa_bits" {
-  description = "The Algorithm for SSH Key RSA Bits."
-  type        = number
-  default     = 4096
-}
-
-variable "azure_trinityx_ssh_key_name" {
-  description = "The Name for SSH Key"
-  type        = string
-  default     = "TrinityX-SSH"
-}
-
-variable "azure_trinityx_ssh_key_tags" {
-  description = "The Tags for the SSH Key"
-  type        = map(string)
-  default     = {
-    HPC        = "TrinityX"
-    module     = "controller",
-    sub-module = "ssh"
-  }
-}
-
-variable "azure_controller_ssh_public_key_access" {
-  description = "The Public IP Address for the Controller"
-  type        = string
-  default     = "Blank"
-}
-
-variable "azure_controller_controller_public_ip" {
-  description = "The Public IP Address for the Controller"
-  type        = string
-  default     = "TrinityXVNGIP"
-}
-
-variable "azure_controller_public_ip_tags" {
-  description = "The Tags for the Public IP Address for the Controller"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX",
-    module     = "network",
-    sub-module = "virtual network gateway"
-  }
-}
-
-variable "azure_controller_public_ip_allocation_method" {
-  description = "The IP Address Allocation Method for the Controller Public IP"
-  type        = string
-  default     = "Static"
-}
-
-variable "azure_controller_public_ip_sku" {
-  description = "The SKU for Controller Public IP"
-  type        = string
-  default     = "Standard"
-}
-
-variable "azure_controller_public_ip_zones" {
-  description = "The Zones for the Controller Public IP"
-  type        = list
-  default     = ["1", "2", "3"]
-}
-
-variable "azure_controller_network_interface" {
-  description = "The Network Interface Name for the Controller"
-  type        = string
-  default     = "TrinityX-Controller-nic"
-}
-
-variable "azure_controller_network_interface_tags" {
-  description = "The Tags for the Controller"
-  type        = map(string)
-  default     = {
-    HPC        = "TrinityX"
-    module     = "vm",
-    sub-module = "controller"
-  }
-}
-
-variable "azure_vm_network_ip_name" {
-  description = "The Network IP Name for the Controller"
-  type        = string
-  default     = "internal"
-}
-
-variable "azure_controller_network_private_ip_allocation" {
-  description = "The Private IP Allocation for the Controller"
-  type        = string
-  default     = "Static"
-}
-
-variable "azure_controller_private_ip_address" {
-  description = "The Private IP Address for the Controller"
-  type        = string
-  default     = "10.1.0.254"
-}
-
-variable "azure_controller_private_ip_address_version" {
-  description = "The Private IP Version for the Controller"
-  type        = string
-  default     = "IPv4"
-}
-
-variable "azure_controller_name" {
-  description = "The Name of the Controller"
-  type        = string
-  default     = "TrinityX-Controller"
-}
-
-variable "azure_controller_size" {
-  description = "The size of the Controller"
-  type        = string
-  default     = "Standard_D2s_v3"
-}
-
-variable "azure_controller_delete_os_disk" {
-  description = "Delete OS disk on Termination for Controller"
-  type        = bool
-  default     = true
-}
-
-variable "azure_controller_delete_data_disk" {
-  description = "Delete Data disk on Termination for Controller"
-  type        = bool
-  default     = true
-}
-
-variable "azure_controller_image_publisher" {
-  description = "Controller OS Image Publisher Name"
-  type        = string
-  default     = "resf"
-}
-
-variable "azure_controller_image_offer" {
-  description = "Controller OS Image Publisher offer"
-  type        = string
-  default     = "rockylinux-x86_64"
-}
-
-variable "azure_controller_image_sku" {
-  description = "Controller OS Image Publisher SKU"
-  type        = string
-  default     = "8-lvm"
-}
-
-variable "azure_controller_image_version" {
-  description = "Controller OS Image Publisher Version"
-  type        = string
-  default     = "latest"
-}
-
-variable "azure_controller_image_marketplace_agreement" {
-  description = "Controller OS Image Publisher Version"
-  type        = bool
-  default     = true
-}
-
-variable "azure_controller_os_caching" {
-  description = "Controller OS Caching"
-  type        = string
-  default     = "ReadWrite"
-}
-
-variable "azure_controller_os_create" {
-  description = "Controller OS Create Option from"
-  type        = string
-  default     = "FromImage"
-}
-
-variable "azure_controller_os_disk_type" {
-  description = "The OS Disk Type for the Controller"
-  type        = string
-  default     = "Standard_LRS"
-}
-
-variable "azure_controller_os_plan" {
-  description = "The OS Plan Name for the Controller"
-  type        = string
-  default     = "8-lvm"
-}
-
-variable "azure_controller_os_plan_publisher" {
-  description = "The OS Plan Publisher for the Controller"
-  type        = string
-  default     = "resf"
-}
-
-variable "azure_controller_os_plan_product" {
-  description = "The OS Plan Product for the Controller"
-  type        = string
-  default     = "rockylinux-x86_64"
-}
-
-variable "azure_controller_os_username" {
-  description = "The OS Username for the Controller"
-  type        = string
-  default     = "azureuser"
-}
-
-variable "azure_controller_os_password" {
-  description = "The OS Password for the Controller"
-  type        = string
-  default     = ""
-}
-
-variable "azure_controller_disable_auth" {
-  description = "Disable password Authentication for the Controller"
-  type        = bool
-  default     = true
-}
-# Azure Controller
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Node
-variable "azure_hostlist" {
-  description = "List of Azure nodes in the format azvm[001-004]"
-  default     = "azvm[001-004]"
-}
-
-variable "azure_node_network_private_ip_allocation" {
-  description = "The Private IP Allocation for the Node(s)"
-  type        = string
-  default     = "Dynamic"
-}
-
-variable "azure_node_size" {
-  description = "The size of the Node"
-  type        = string
-  default     = "Standard_D2s_v3"
-}
-
-variable "azure_node_delete_os_disk" {
-  description = "Delete OS disk on Termination for Node(s)"
-  type        = bool
-  default     = true
-}
-
-variable "azure_node_delete_data_disk" {
-  description = "Delete Data disk on Termination for Node(s)"
-  type        = bool
-  default     = true
-}
-
-variable "azure_node_os_caching" {
-  description = "Node OS Caching"
-  type        = string
-  default     = "ReadWrite"
-}
-
-variable "azure_node_os_create" {
-  description = "Node OS Create Option from"
-  type        = string
-  default     = "FromImage"
-}
-
-variable "azure_node_os_disk_type" {
-  description = "The OS Disk Type for the Node"
-  type        = string
-  default     = "Standard_LRS"
-}
-
-variable "azure_node_os_username" {
-  description = "The OS Username for the Node"
-  type        = string
-  default     = "azureuser"
-}
-
-variable "azure_node_os_password" {
-  description = "The OS Password for the Node"
-  type        = string
-  default     = ""
-}
-
-variable "azure_node_disable_auth" {
-  description = "Disable password Authentication for the Node"
-  type        = bool
-  default     = false
-}
-# Azure Node
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Add By the the Previous Runs
-variable "subnet_id" {
-  type        = string
-  description = "The ID of the subnet to place the VM in"
-  default     = ""
-}
-variable "image_id" {
-  type        = string
-  description = "The ID of the subnet to place the VM in"
-  default     = ""
-}
-
-variable "storage_name" {
-  type        = string
-  description = "The ID of the subnet to place the VM in"
-  default     = ""
-}
-# Add By the the Previous Runs
-# ------------------------------------------------------------------------------ #
-
-
-
-
-

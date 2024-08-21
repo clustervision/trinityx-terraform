@@ -17,12 +17,14 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/network/main.tf
+# File: aws/modules/network/main.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform module for creating network resources in Azure,
-#              including virtual networks and network security groups.
+# Date: 2024-08-06
+# Description: Terraform module for creating VPC in AWS, including the Public
+#              Subnet, Internet Gateway, Route Table, Route Table Association,
+#              Network ACL, Network ACL Association, and Security Group with
+#              inbound and outbound rules.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -35,99 +37,152 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Network Security Group Definition
-# This security group is a default security group which will be used by the Controller & nodes.
+# VPC
+# This block will create the VPC for the TrinityX.
 # ------------------------------------------------------------------------------
-resource "azurerm_network_security_group" "nsg" {
-  name                = var.azure_nsg
-  resource_group_name = var.azure_resource_group.name
-  location            = var.azure_resource_group.location
-  tags                = var.azure_nsg_tags
+resource "aws_vpc" "trinityx" {
+  cidr_block       = var.aws_vpc_cidr_block
+  instance_tenancy = var.aws_vpc_instance_tenancy
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
-}
-
-# ------------------------------------------------------------------------------
-# Network Security Group Rules
-# This will add the rules for Network security group which is created above.
-# ------------------------------------------------------------------------------
-resource "azurerm_network_security_rule" "nsg_rules" {
-  for_each = { for rule in var.azure_nsg_security_rules : rule.name => rule }
-
-  name                        = each.key
-  priority                    = each.value.priority
-  direction                   = each.value.direction
-  access                      = each.value.access
-  protocol                    = each.value.protocol
-  source_port_range           = each.value.source_port_range
-  destination_port_range      = each.value.destination_port_range
-  source_address_prefix       = each.value.source_address_prefix
-  destination_address_prefix  = each.value.destination_address_prefix
-  network_security_group_name = azurerm_network_security_group.nsg.name
-  resource_group_name         = azurerm_network_security_group.nsg.resource_group_name
-  description                 = each.value.description
-
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
-}
-
-# ------------------------------------------------------------------------------
-# Virtual Network Definition
-# This Virtual Network will be used by Controllers, nodes and LNG and VNG.
-# ------------------------------------------------------------------------------
-resource "azurerm_virtual_network" "vnet" {
-  name                = var.azure_virtual_network
-  resource_group_name = var.azure_resource_group.name
-  location            = var.azure_resource_group.location
-  address_space       = var.azure_virtual_network_address_space
-  tags                = var.azure_virtual_network_tags
-  encryption {
-    enforcement = var.azure_virtual_network_encryption
+  tags = {
+    Name = var.aws_vpc_name
   }
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
+  enable_dns_support   = var.aws_vpc_enable_dns_support
+  enable_dns_hostnames = var.aws_vpc_enable_dns_hostnames
 }
 
 # ------------------------------------------------------------------------------
-# Virtual Network Subnets Addition
-# This block will add Subnets to the Virtual Nerwork.
+# Public Subnet
+# This block will create the public subnet on the VPC for TrinityX.
 # ------------------------------------------------------------------------------
-resource "azurerm_subnet" "subnet" {
-  count = length(var.azure_virtual_network_subnets)
-  name                 = var.azure_virtual_network_subnets[count.index].name
-  resource_group_name = var.azure_resource_group.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes       = [var.azure_virtual_network_subnets[count.index].address_prefix]
+resource "aws_subnet" "public_subnet" {
+  vpc_id            = aws_vpc.trinityx.id
+  cidr_block        = var.aws_vpc_subnet_cidr_block
+  availability_zone = var.aws_availability_zone
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
+  tags = {
+    Name = var.aws_vpc_subnet_name
+  }
 }
 
 # ------------------------------------------------------------------------------
-# Virtual Network Subnets Network Security Group Association
-# This block will Associate the Network Security Group to the Virtual Network Subnets.
+# Internet Gateway
+# This block will create the internet gateway on the VPC for TrinityX.
 # ------------------------------------------------------------------------------
-resource "azurerm_subnet_network_security_group_association" "subnet_nsg" {
-  count = length(var.azure_virtual_network_subnets)
-  depends_on = [azurerm_subnet.subnet]
-  subnet_id                 = azurerm_subnet.subnet[count.index].id
-  network_security_group_id = azurerm_network_security_group.nsg.id
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.trinityx.id
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-  
+  tags = {
+    Name = var.aws_vpc_internet_gateway_name
+  }
 }
+
+# ------------------------------------------------------------------------------
+# Route Table
+# This block will create the route table for public subnet for TrinityX VPC.
+# ------------------------------------------------------------------------------
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.trinityx.id
+
+  route {
+    cidr_block = var.aws_route_table_cidr_block
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = var.aws_route_table_name
+  }
+}
+
+# ------------------------------------------------------------------------------
+# Route Table Association
+# This block will associate route table to the public subnet for TrinityX VPC.
+# ------------------------------------------------------------------------------
+resource "aws_route_table_association" "public_rt_assoc" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+# ------------------------------------------------------------------------------
+# Network ACL
+# This block will create network access control list for the TrinityX VPC.
+# ------------------------------------------------------------------------------
+resource "aws_network_acl" "public_nacl" {
+  vpc_id = aws_vpc.trinityx.id
+
+  dynamic "egress" {
+    for_each = [for rule in var.aws_network_acl_rules : rule if rule.direction == "egress"]
+    content {
+      protocol   = egress.value.protocol
+      rule_no    = egress.value.rule_no
+      action     = egress.value.action
+      cidr_block = egress.value.cidr_block
+      from_port  = egress.value.from_port
+      to_port    = egress.value.to_port
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = [for rule in var.aws_network_acl_rules : rule if rule.direction == "ingress"]
+    content {
+      protocol   = ingress.value.protocol
+      rule_no    = ingress.value.rule_no
+      action     = ingress.value.action
+      cidr_block = ingress.value.cidr_block
+      from_port  = ingress.value.from_port
+      to_port    = ingress.value.to_port
+    }
+  }
+
+  tags = {
+    Name = var.aws_network_acl_name
+  }
+}
+
+# ------------------------------------------------------------------------------
+# Network ACL Association
+# This block will associate network access control list with public subnet for TrinityX VPC.
+# ------------------------------------------------------------------------------
+resource "aws_network_acl_association" "public_nacl_assoc" {
+  subnet_id     = aws_subnet.public_subnet.id
+  network_acl_id = aws_network_acl.public_nacl.id
+}
+
+# ------------------------------------------------------------------------------
+# Security Group
+# This block will create security group and with inbound and outbound rules for the TrinityX VPC.
+# ------------------------------------------------------------------------------
+resource "aws_security_group" "vpn_sg" {
+  vpc_id = aws_vpc.trinityx.id
+  dynamic "egress" {
+    for_each = [for rule in var.aws_security_group_rules : rule if rule.direction == "egress"]
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks = egress.value.cidr_blocks
+      description = egress.value.description
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = [for rule in var.aws_security_group_rules : rule if rule.direction == "ingress"]
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+      description = ingress.value.description
+    }
+  }
+
+  tags = {
+    Name = var.aws_security_group_name
+  }
+}
+
+
 
 
 

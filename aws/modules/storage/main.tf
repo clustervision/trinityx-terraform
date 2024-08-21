@@ -1,4 +1,3 @@
-
 # ------------------------------------------------------------------------------
 # This code is part of the TrinityX software suite
 # Copyright (C) 2023  ClusterVision Solutions b.v.
@@ -18,12 +17,12 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/storage/main.tf
+# File: aws/modules/storage/main.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform module for creating Storage account, blob container,
-#               and upload the VHD in.
+# Date: 2024-08-08
+# Description: Terraform module for creating S3 Bucket in AWS including
+#              bucket versioning, server side encryption, and public access.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -31,90 +30,60 @@
 # Notes:
 # - This module expects certain variables to be passed in for proper configuration.
 # - Ensure that the parent module provides the required variables.
-# - The module includes best practices for Storage Account, Container and VHD.
+# - The module includes best practices for network security and scalability.
 # - All variables will be passed by the Root(parent) module.
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Storage Account Name Definition
-# This block will create Storage Account Name which should be unique across the Azure.
+# S3 Bucket
+# This block will create the S3 Bucket.
 # ------------------------------------------------------------------------------
-resource "random_string" "rnd" {
-  length      = 4
-  min_numeric = 4
-  special     = false
-  lower       = true
-}
+resource "aws_s3_bucket" "trinityx_bucket" {
+  bucket_prefix = var.aws_s3_bucket_prefix
+  force_destroy = var.aws_s3_force_destroy
 
-# ------------------------------------------------------------------------------
-# Storage Account Definition
-# This block will create a Storage Account.
-# ------------------------------------------------------------------------------
-resource "azurerm_storage_account" "storage" {
-  # name                          = "${var.azure_storage_account}${formatdate("YYYYMMDDhhmmss", timestamp())}${random_string.rnd.result}"
-  name                          = "${var.azure_storage_account}${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  resource_group_name           = var.azure_resource_group.name
-  location                      = var.azure_resource_group.location
-  account_kind                  = var.azure_storage_account_kind
-  account_tier                  = var.azure_storage_account_tier
-  account_replication_type      = var.azure_storage_replication_type
-  tags                          = var.azure_storage_account_tag
-  access_tier                   = var.azure_storage_access_tier
-  min_tls_version               = var.azure_storage_min_tls
-  enable_https_traffic_only     = var.azure_storage_https_traffic
-  shared_access_key_enabled     = var.azure_storage_access_key
-  public_network_access_enabled = var.azure_storage_public_network
-  default_to_oauth_authentication = var.azure_storage_oauth
-  is_hns_enabled = var.azure_storage_hns
-  nfsv3_enabled = var.azure_storage_nfsv3
-  blob_properties {
-    versioning_enabled = var.azure_storage_blob_versioning
-    change_feed_enabled = var.azure_storage_blob_change_feed
-    delete_retention_policy {
-      days = var.azure_storage_retain_deleted_blobs
-    }
+  tags = {
+    Name        = var.aws_s3_bucket_name_tag
+    Environment = var.aws_s3_bucket_env
   }
-  
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-  
 }
 
 # ------------------------------------------------------------------------------
-# Storage Account Container Definition
-# This block will create a blob Container inside the Storage Account.
+# S3 Bucket - Versioning
+# This block will setup the versioning for the S3 Bucket.
 # ------------------------------------------------------------------------------
-resource "azurerm_storage_container" "container" {
-  name                  =  var.azure_storage_container
-  storage_account_name  = azurerm_storage_account.storage.name
-  container_access_type = var.azure_storage_container_access_type
+resource "aws_s3_bucket_versioning" "trinityx_versioning" {
+  bucket = aws_s3_bucket.trinityx_bucket.id
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
+  versioning_configuration {
+    status = var.aws_s3_bucket_versioning
+  }
 }
 
 # ------------------------------------------------------------------------------
-# Upload VHD
-# This block will upload VHD file to the blob Container inside the Storage Account.
+# S3 Bucket - Encryption
+# This block will setup the server side encryption for the S3 Bucket.
 # ------------------------------------------------------------------------------
-resource "azurerm_storage_blob" "vhd" {
-  name                   = var.azure_vhd
-  storage_account_name   = azurerm_storage_account.storage.name
-  storage_container_name = azurerm_storage_container.container.name
-  type                   = var.azure_vhd_type
-  source                 = var.azure_vhd_file_path
-  # access_tier            = var.azure_vhd_access_tier
-  depends_on             = [azurerm_storage_container.container]
+resource "aws_s3_bucket_server_side_encryption_configuration" "trinityx_encryption" {
+  bucket = aws_s3_bucket.trinityx_bucket.id
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = var.aws_s3_bucket_enc_algorithm
+    }
+    bucket_key_enabled = var.aws_s3_bucket_key
+  }
 }
 
-
-
+# ------------------------------------------------------------------------------
+# S3 Bucket - Access
+# This block will setup the public access for the S3 Bucket.
+# ------------------------------------------------------------------------------
+resource "aws_s3_bucket_public_access_block" "trinityx_public_access_block" {
+  bucket                  = aws_s3_bucket.trinityx_bucket.id
+  block_public_acls       = var.aws_s3_block_public_acls
+  block_public_policy     = var.aws_s3_block_public_policy
+  ignore_public_acls      = var.aws_s3_ignore_public_acls
+  restrict_public_buckets = var.aws_s3_restrict_public_buckets
+}
 

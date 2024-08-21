@@ -17,51 +17,63 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/network/outputs.tf
+# File: aws/modules/vpn/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform Network Module Outputs file, will be output some of
+# Date: 2024-08-06
+# Description: Terraform VPN Module Outputs file, will be output some of
 #              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - This output file outputs the network related information.
+# - This output file outputs the vpn related information.
 # ------------------------------------------------------------------------------
-
-output "vnet_gateway_id" {
-  value         = azurerm_subnet.gateway_subnet.id
-  description   = "The ID of the Gateway Subnet created for the Virtual Network in VPN Module"
-}
-
-output "lng_id" {
-  value         = azurerm_local_network_gateway.lng.id
-  description   = "The ID of Local Network Gateway created in VPN Module"
-}
-
-output "vng_ip_id" {
-  value         = azurerm_public_ip.vng_ip.id
-  description   = "The ID of the Virtual Network Gateway Public IP Address created in the VPN Module"
-}
-
-output "vng_ip" {
-  value         = azurerm_public_ip.vng_ip.ip_address
-  description   = "The Public IP Address for Virtual Network Gateway created in the VPN Module"
-}
-
-output "vng_id" {
-  value         = azurerm_virtual_network_gateway.vng.id
-  description   = "The ID of the Virtual Network Gateway created in the VPN Module"
-}
-
-output "connection_id" {
-  value         = azurerm_virtual_network_gateway_connection.connection.id
-  description   = "The ID of the Connection created in the VPN Module between Local Network Gateway and Virtual Network Gateway."
-}
 
 output "ipinfo" {
   value       = jsondecode(data.http.ipinfo.response_body).ip
   description = "The Public IP Address for the installation Machine."
 }
+
+output "customer_gateway_id" {
+  value       = aws_customer_gateway.trinityx_vsphere.id
+  description = "The ID of the customer gateway created in VPN Module"
+}
+
+output "vpn_gateway_id" {
+  value       = aws_vpn_gateway.trinityx_vpg.id
+  description = "The ID of the VPN gateway ID created in VPN Module"
+}
+
+output "vpn_connection_id" {
+  value       = aws_vpn_connection.trinityx_vpn.id
+  description = "The ID of the VPN connection ID created in VPN Module"
+}
+
+output "vpn_tunnel1_ip" {
+  value       = aws_vpn_connection.trinityx_vpn.tunnel1_address
+  description = "The VPN Tunnel1 IP Address"
+}
+
+output "vpn_tunnel1_preshared_key" {
+  value       = nonsensitive(aws_vpn_connection.trinityx_vpn.tunnel1_preshared_key)
+  description = "The VPN Tunnel1 Preshared Key"
+}
+
+output "vpn_tunnel2_ip" {
+  value       = aws_vpn_connection.trinityx_vpn.tunnel2_address
+  description = "The VPN Tunnel2 IP Address"
+}
+
+output "vpn_tunnel2_preshared_key" {
+  value       = nonsensitive(aws_vpn_connection.trinityx_vpn.tunnel2_preshared_key)
+  description = "The VPN Tunnel2 Preshared Key"
+}
+
+output "vpn_connection_configuration_detail" {
+  value       = nonsensitive(aws_vpn_connection.trinityx_vpn.customer_gateway_configuration)
+  description = "The VPN configuration details in XML"
+}
+
+

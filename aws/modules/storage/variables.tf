@@ -17,183 +17,83 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/storage/variables.tf
+# File: aws/modules/storage/variables.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Variables file for the Storage Account, conatiner and VHD.
+# Date: 2024-08-08
+# Description: Terraform Variables file for the Storage module for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - Define all the input variables required by the main configuration and modules.
+# - Define all the input variables required by the storage module.
 # - Update the default values as needed to match the target environment.
 # - Ensure sensitive variables are handled securely.
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ #
-# Azure Resource Group
-variable "azure_resource_group" {
-  description = "The name of the Network Security Group"
-  type        = object({ 
-    name      = string
-    location  = string
-  })
-  default     = {
-    name      = "TrinityX"
-    location  = "Germany West Central"
-  }
-}
-# Azure Resource Group
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Storage Account, Blob Container, VHD Upload, Azure Image, Shared Image Gallery & Versioning.
-variable "azure_storage_account" {
-  description = "The Account Name for Azure Storage Account"
+variable "aws_s3_bucket_prefix" {
+  description = "The name prefix for the AWS S3 bucket."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_account_tag" {
-  description = "The Tags for the Storage Account"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "storage",
-    sub-module = "account"
-  }
-}
-
-variable "azure_storage_account_kind" {
-  description = "The Account kind for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_account_tier" {
-  description = "The Account Tier for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_replication_type" {
-  description = "The Replication Type for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_access_tier" {
-  description = "The Access Tier for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_min_tls" {
-  description = "The Minimum TLS for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-
-variable "azure_storage_https_traffic" {
-  description = "The HTTPS traffic for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_access_key" {
-  description = "The Access Key for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_public_network" {
-  description = "The Public network access for Azure Storage Account"
-  type        = bool
-  default     = true
-}
-
-variable "azure_storage_oauth" {
-  description = "The OAuth for Azure Storage Account"
+variable "aws_s3_force_destroy" {
+  description = "The AWS S3 bucket force destroy."
   type        = bool
   default     = false
 }
 
-variable "azure_storage_hns" {
-  description = "The Hierarchical namespace for Azure Storage Account"
-  type        = bool
-  default     = false
-}
-
-variable "azure_storage_nfsv3" {
-  description = "The NFS V3 for Azure Storage Account"
-  type        = bool
-  default     = false
-}
-
-variable "azure_storage_blob_versioning" {
-  description = "The Blob Versioning for Azure Storage Account"
-  type        = string
-  default     = ""
-}
-variable "azure_storage_blob_change_feed" {
-  description = "The Blob Change Feed for Azure Storage Account"
+variable "aws_s3_bucket_name_tag" {
+  description = "The AWS S3 bucket name tag."
   type        = string
   default     = ""
 }
 
-variable "azure_storage_retain_deleted_blobs" {
-  description = "The Retain Deleted Blobs for Azure Storage Account"
-  type        = number
-  default     = 7
-}
-# Azure Storage Account, Blob Container, VHD Upload, Azure Image, Shared Image Gallery & Versioning.
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Storage Account Container
-variable "azure_storage_container" {
-  description = "The Container Name for the Azure Storage Account"
+variable "aws_s3_bucket_env" {
+  description = "TheAWS S3 bucket environment."
   type        = string
-  default     = "trinityx-images"
+  default     = ""
 }
 
-variable "azure_storage_container_access_type" {
-  description = "The Container Access Type for the Azure Storage Account"
+variable "aws_s3_bucket_versioning" {
+  description = "The AWS S3 bucket Versioning."
   type        = string
-  default     = "private"
+  default     = ""
 }
-# Azure Storage Account Container
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Storage Storage Blob VHD
-variable "azure_vhd" {
-  description = "The name of the storage blob"
+variable "aws_s3_bucket_enc_algorithm" {
+  description = "The AWS S3 bucket encryption algorithm."
   type        = string
-  default     = "azure.vhd"
-}
-variable "azure_vhd_type" {
-  description = "The type of the storage blob"
-  type        = string
-  default     = "Page"
+  default     = ""
 }
 
-variable "azure_vhd_file_path" {
-  description = "The local path to the VHD file"
-  type        = string
-  default     = "/trinity/images/azure.vhd"
+variable "aws_s3_bucket_key" {
+  description = "The AWS S3 bucket ey enablement."
+  type        = bool
+  default     = false
 }
 
-variable "azure_vhd_access_tier" {
-  description = "The access tier for the VHD file"
-  type        = string
-  default     = "Hot"
+variable "aws_s3_block_public_acls" {
+  description = "The AWS S3 bucket block public ACL."
+  type        = bool
+  default     = false
 }
-# Azure Storage Storage Blob VHD
-# ------------------------------------------------------------------------------ #
 
+variable "aws_s3_block_public_policy" {
+  description = "The AWS S3 bucket bloc public policy."
+  type        = bool
+  default     = false
+}
 
+variable "aws_s3_ignore_public_acls" {
+  description = "The AWS S3 bucket ignore public ACL."
+  type        = bool
+  default     = false
+}
 
-
+variable "aws_s3_restrict_public_buckets" {
+  description = "The AWS S3 bucket restrict public buckets."
+  type        = bool
+  default     = false
+}

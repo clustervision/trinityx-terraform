@@ -17,12 +17,13 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/node/main.tf
+# File: aws/modules/node/main.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-06-03
-# Description: Terraform module for creating Controller network Interface in Azure,
-#              And The TrinityX Controller on Azure Cloud.
+# Date: 2024-08-09
+# Description: Terraform module for creating EC2 Instances for nodes in AWS
+#              including fetch the Account ID and latest uploaded AMI ID, EC2
+#              Instances creation, and retrieve the MAC Address for each node.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -35,70 +36,54 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Node Network Interface Definition
-# This block will create Nodes network interface for TrinityX Controller.
+# AWS Node
+# This block will collect the Account ID for the Next query.
 # ------------------------------------------------------------------------------
-resource "azurerm_network_interface" "node_nic" {
-  for_each = toset(var.hostnames)
-  name                = "${each.key}-nic"
-  resource_group_name = var.azure_resource_group.name
-  location            = var.azure_resource_group.location
+data "aws_caller_identity" "current" {}
 
-  ip_configuration {
-    name                          = var.azure_vm_network_ip_name
-    subnet_id                     = var.subnet_id
-    private_ip_address_allocation = var.azure_node_network_private_ip_allocation
-  }
+# ------------------------------------------------------------------------------
+# Get AMI
+# This block will fetch the latest uploaded AMI ID by Terraform.
+# ------------------------------------------------------------------------------
+data "aws_ami" "node_ami" {
+  most_recent = true
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-  
+  owners = [data.aws_caller_identity.current.account_id]
 }
 
-resource "azurerm_virtual_machine" "node" {
-  for_each              = toset(var.hostnames)
-  name                  = each.key
-  resource_group_name   = var.azure_resource_group.name
-  location              = var.azure_resource_group.location
-  vm_size               = var.azure_node_size
-  network_interface_ids = [azurerm_network_interface.node_nic[each.key].id]
+# ------------------------------------------------------------------------------
+# AWS Node
+# This block will create EC2 Instances for the TrinityX nodes, depending on the
+# provided hostlist.
+# ------------------------------------------------------------------------------
+resource "aws_instance" "node" {
+  for_each      = toset(var.hostnames)
+  ami           = data.aws_ami.node_ami.id
+  instance_type = var.aws_node_instance_type
+  subnet_id     = var.public_subnet_id
 
-  delete_os_disk_on_termination     = var.azure_node_delete_os_disk
-  delete_data_disks_on_termination  = var.azure_node_delete_data_disk
+  associate_public_ip_address = var.aws_node_automatic_public_ip
+  vpc_security_group_ids      = [var.sg_id]
 
-  storage_os_disk {
-    name              = "${each.key}-osdisk"
-    caching           = var.azure_node_os_caching
-    create_option     = var.azure_node_os_create
-    managed_disk_type = var.azure_node_os_disk_type
-    disk_size_gb      = 20
+  root_block_device {
+    volume_size = var.aws_node_root_device_size
+    volume_type = var.aws_node_root_device_type
   }
 
-  os_profile {
-    computer_name  = each.key
-    admin_username = var.azure_node_os_username
-    admin_password = var.azure_node_os_password
+  tags = {
+    Name = each.key
   }
-
-  os_profile_linux_config {
-    disable_password_authentication = var.azure_node_disable_auth
-  }
-
-  storage_image_reference {
-    id = var.image_id
-  }
-
-  boot_diagnostics {
-    enabled     = true
-    storage_uri = "https://${var.storage_name}.blob.core.windows.net/"
-  }
-
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-  
 }
 
+# ------------------------------------------------------------------------------
+# AWS Node Mac Address
+# This data block will retrieve the MAC Address for each node.
+# ------------------------------------------------------------------------------
+data "aws_network_interface" "node_mac" {
+  for_each = aws_instance.node
+  id       = each.value.primary_network_interface_id
+
+  depends_on = [ aws_instance.node ]
+}
 
 

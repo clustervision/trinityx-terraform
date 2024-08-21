@@ -17,11 +17,11 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/controller/outputs.tf
+# File: aws/modules/controller/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform Controller Module Outputs file, will be output some of
+# Date: 2024-08-09
+# Description: Terraform controller Module Outputs file, will be output some of
 #              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
@@ -31,59 +31,17 @@
 # - This output file outputs the controller related information.
 # ------------------------------------------------------------------------------
 
-# output "controller_agr" {
-#   value       = azurerm_marketplace_agreement.controller_agr.id
-#   description = "Marketplace OS Agreement for Controller"
-# }
-
-# output "ssh_public_key" {
-#   value       = tls_private_key.trinityx.public_key_openssh
-#   description = "Container SSH Public Key for Authentication"
-# }
-
-# output "ssh_private_key" {
-#   value       = tls_private_key.trinityx.private_key_pem
-#   sensitive   = true
-#   description = "Container SSH Private Key to store some where safely"
-# }
-
-# output "ssh_public_key_id" {
-#   value       = azurerm_ssh_public_key.trinityx_key.id
-#   description = "Container SSH Public Key ID"
-# }
-
-output "controller_public_ip_id" {
-  value       = azurerm_public_ip.controller_public_ip.id
-  description = "The ID of the Public IP Address created for the Controller"
-}
-
-output "controller_public_ip_address" {
-  value       = azurerm_public_ip.controller_public_ip.ip_address
-  description = "The Public IP Address created for the Controller"
-}
-
-output "controller_nic" {
-  value       = azurerm_network_interface.controller_nic.id
-  description = "The ID of the Network Interface created for the Controller"
+output "aws_controller_ami_id" {
+  description = "The AWS Controller AMI ID"
+  value       = data.aws_ami.controller_ami_id.id
 }
 
 output "controller_id" {
-  value       = azurerm_virtual_machine.controller.id
-  description = "The ID of the Controller"
+  description = "The AWS controller EC2 instance ID"
+  value       = aws_instance.controller.id
 }
 
-output "controller_os_disk_name" {
-  value       = azurerm_virtual_machine.controller.storage_os_disk[0].name
-  description = "The OS Disk Name created for the Controller"
+output "controller_public_ip" {
+  description = "The AWS controller public IP address"
+  value       = aws_eip.trinityx_eip.public_ip
 }
-
-output "controller_os_disk_id" {
-  value       = azurerm_virtual_machine.controller.storage_os_disk[0].managed_disk_id
-  description = "The  OS Disk Name ID created for the Controller"
-}
-
-# output "controller_ssh_key_path" {
-#   value = [for config in azurerm_virtual_machine.controller.os_profile_linux_config : config.ssh_keys[0].path if config.ssh_keys != null][0]
-#   description = "The Controller SSH Key Path"
-# }
-

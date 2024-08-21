@@ -17,11 +17,11 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/node/outputs.tf
+# File: aws/modules/node/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Terraform Node Module Outputs file, will be output some of
+# Date: 2024-08-09
+# Description: Terraform node Module Outputs file, will be output some of
 #              important information, will be used further.
 # Version: 1.0.0
 # Status: Development
@@ -31,24 +31,39 @@
 # - This output file outputs the node related information.
 # ------------------------------------------------------------------------------
 
-output "node_nic" {
-  value       = { for k, v in azurerm_network_interface.node_nic : k => v.id }
-  description = "The ID of the Network Interface created for the Node"
-}
-
 output "node_id" {
-  value       = { for k, v in azurerm_virtual_machine.node : k => v.id }
   description = "The ID of the Node"
+  value       = { for k, v in aws_instance.node : k => v.id }
 }
 
-output "node_os_disk_name" {
-  value       = { for k, v in azurerm_virtual_machine.node : k => v.storage_os_disk[0].name }
-  description = "The OS Disk Name created for the Node"
+output "node_ip" {
+  description = "The IP of the Node"
+  value       = { for k, v in aws_instance.node : k => v.private_ip }
 }
 
-output "node_os_disk_id" {
-  value       = { for k, v in azurerm_virtual_machine.node : k => v.storage_os_disk[0].managed_disk_id }
-  description = "The  OS Disk Name ID created for the Node"
+output "node_interface_id" {
+  description = "The Interface ID for the Node"
+  value       = { for k, v in aws_instance.node : k => v.primary_network_interface_id }
 }
+
+output "node_ami_id" {
+  description = "The AMI ID."
+  value       = data.aws_ami.node_ami.id
+}
+
+output "account_id" {
+  description = "The Account ID of the Current User."
+  value = data.aws_caller_identity.current.account_id
+}
+
+output "node_mac_address" {
+  description = "The MAC address of the EC2 instance"
+  value       = { for k, v in data.aws_network_interface.node_mac : k => v.mac_address }
+}
+
+
+
+
+
 
 

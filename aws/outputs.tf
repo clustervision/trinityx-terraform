@@ -17,11 +17,11 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/outputs.tf
+# File: aws/outputs.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Main output file for the Azure Terraform configuration for TrinityX.
+# Date: 2024-08-05
+# Description: Main output file for the AWS Terraform configuration for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -33,188 +33,167 @@
 
 # ------------------------------------------------------------------------------
 # Output from Network Module
-output "subnet_id" {
-  value       = var.azure_network ? module.network[0].subnet_id : null
-  description = "The ID of the subnet created in the network module"
+output "vpc_id" {
+  value = var.aws_network ? module.network[0].vpc_id : null
+  description = "The ID of the VPC created in the network module"
 }
 
-output "nsg_id" {
-  value       = var.azure_network ? module.network[0].nsg_id : null
-  description = "The ID of the Network Security Group created in the network module"
+output "public_subnet_id" {
+  value = var.aws_network ? module.network[0].public_subnet_id : null
+  description = "The ID of the public subnet created in the network module"
 }
 
-output "vnet_id" {
-  value       = var.azure_network ? module.network[0].vnet_id : null
-  description = "The ID of the Virtual Network created in the network module"
+output "internet_gateway_id" {
+  value = var.aws_network ? module.network[0].internet_gateway_id : null
+  description = "The ID of the internet gateway created in the network module"
 }
+
+output "route_table_id" {
+  value = var.aws_network ? module.network[0].route_table_id : null
+  description = "The ID of the routing table created in the network module"
+}
+
+output "sg_id" {
+  value = var.aws_network ? module.network[0].sg_id : null
+  description = "The ID of the security group created in the network module"
+}
+# Output from Network Module
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # Output from VPN Module
-output "vnet_gateway_id" {
-  value         = var.azure_vpn ? module.vpn[0].vnet_gateway_id : null
-  description   = "The ID of the Gateway Subnet created for the Virtual Network in VPN Module"
-}
-
-output "lng_id" {
-  value         = var.azure_vpn ? module.vpn[0].lng_id : null
-  description   = "The ID of Local Network Gateway created in VPN Module"
-}
-
-output "vng_ip_id" {
-  value         = var.azure_vpn ? module.vpn[0].vng_ip_id : null
-  description   = "The ID of the Virtual Network Gateway Public IP Address created in the VPN Module"
-}
-
-output "vng_ip" {
-  value         = var.azure_vpn ? module.vpn[0].vng_ip : null
-  description   = "The Public IP Address for Virtual Network Gateway created in the VPN Module"
-}
-
-output "vng_id" {
-  value         = var.azure_vpn ? module.vpn[0].vng_id : null
-  description   = "The ID of the Virtual Network Gateway created in the VPN Module"
-}
-
-output "connection_id" {
-  value         = var.azure_vpn ? module.vpn[0].connection_id : null
-  description   = "The ID of the Connection created in the VPN Module between Local Network Gateway and Virtual Network Gateway."
-}
-
 output "ipinfo" {
-  value       = var.azure_vpn ? module.vpn[0].ipinfo : null
+  value       = var.aws_vpn ? module.vpn[0].ipinfo : null
   description = "The Public IP Address for the installation Machine."
 }
 
+output "customer_gateway_id" {
+  value       = var.aws_vpn ? module.vpn[0].customer_gateway_id : null
+  description = "The ID of the customer gateway created in VPN Module"
+}
+
+output "vpn_gateway_id" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_gateway_id : null
+  description = "The ID of the VPN gateway ID created in VPN Module"
+}
+
+output "vpn_connection_id" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_connection_id : null
+  description = "The ID of the VPN connection ID created in VPN Module"
+}
+
+output "vpn_tunnel1_ip" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel1_ip : null
+  description = "The VPN Tunnel1 IP Address"
+}
+
+output "vpn_tunnel1_preshared_key" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel1_preshared_key : null
+  description = "The VPN Tunnel1 Preshared Key"
+}
+
+output "vpn_tunnel2_ip" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel2_ip : null
+  description = "The VPN Tunnel2 IP Address"
+}
+
+output "vpn_tunnel2_preshared_key" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_tunnel2_preshared_key : null
+  description = "The VPN Tunnel2 Preshared Key"
+}
+
+output "vpn_connection_configuration_detail" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_connection_configuration_detail : null
+  description = "The VPN configuration details"
+}
+# Output from VPN Module
+# ------------------------------------------------------------------------------
+
 # ------------------------------------------------------------------------------
 # Output from Storage Module
-output "storage_name" {
-  value       = var.azure_storage ? module.storage[0].storage_name : null
-  description = "The Name of the Storage Account"
+output "bucket_name" {
+  value       = var.aws_storage ? module.storage[0].bucket_name : null
+  description = "The AWS S3 Bucket Name for the TrinityX."
 }
 
-output "storage_id" {
-  value       = var.azure_storage ? module.storage[0].storage_id : null
-  description = "The ID of the Storage Account"
+output "bucket_arn" {
+  value       = var.aws_storage ? module.storage[0].bucket_arn : null
+  description = "The AWS S3 Bucket ARN for the TrinityX."
 }
 
-output "container_id" {
-  value       = var.azure_storage ? module.storage[0].container_id : null
-  description = "The ID of the Storage Account Container"
-}
-
-output "vhd_id" {
-  value       = var.azure_storage ? module.storage[0].vhd_id : null
-  description = "The ID of the Uploaded VHD in Storage Account Container"
-}
-
-output "vhd_url" {
-  value       = var.azure_storage ? module.storage[0].vhd_url : null
-  description = "The URL of the Uploaded VHD in Storage Account Container"
-}
+# Output from Storage Module
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # Output from Image Module
-output "image_id" {
-  value       = var.azure_images ? module.image[0].image_id : null
-  description = "The ID of the Azure Image"
+output "object_url" {
+  value       = var.aws_image ? module.image[0].object_url : null
+  description = "The S3 URL for the VHD."
 }
 
-# output "gallery_id" {
-#   value       = var.azure_images ? module.image[0].gallery_id : null
-#   description = "The ID of the Azure Compute Gallery"
-# }
-
-# output "shared_image_id" {
-#   value       = var.azure_images ? module.image[0].shared_image_id : null
-#   description = "The ID of the Shared Image within Azure Compute Gallery"
-# }
-
-# output "image_version_id" {
-#   value       = var.azure_images ? module.image[0].image_version_id : null
-#   description = "The ID of the Version for Shared Image within Azure Compute Gallery"
-# }
+output "ami_id" {
+  value       = var.aws_image ? module.image[0].ami_id : null
+  description = "The AMI ID."
+}
+# Output from Image Module
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Output from the Controller
-# output "controller_agr" {
-#   value       = var.azure_controller ? module.controller[0].controller_agr : null
-#   description = "Marketplace OS Agreement for Controller"
-# }
-
-# output "ssh_public_key" {
-#   value       = var.azure_controller ? module.controller[0].ssh_public_key : null
-#   description = "Container SSH Public Key for Authentication"
-# }
-
-# output "ssh_private_key" {
-#   value       = var.azure_controller ? module.controller[0].ssh_private_key : null
-#   sensitive   = true
-#   description = "Container SSH Private Key to store some where safely"
-# }
-
-# output "ssh_public_key_id" {
-#   value       = var.azure_controller ? module.controller[0].ssh_public_key_id : null
-#   description = "Container SSH Public Key ID"
-# }
-
-output "controller_public_ip_id" {
-  value       = var.azure_controller ? module.controller[0].controller_public_ip_id : null
-  description = "The ID of the Public IP Address created for the Controller"
-}
-
-output "controller_public_ip_address" {
-  value       = var.azure_controller ? module.controller[0].controller_public_ip_address : null
-  description = "The Public IP Address created for the Controller"
-}
-
-output "controller_nic" {
-  value       = var.azure_controller ? module.controller[0].controller_nic : null
-  description = "The ID of the Network Interface created for the Controller"
+# Output from Controller Module
+output "aws_controller_ami_id" {
+  description = "The AWS Controller AMI ID"
+  value       = var.aws_controller ? module.controller[0].aws_controller_ami_id : null
 }
 
 output "controller_id" {
-  value       = var.azure_controller ? module.controller[0].controller_id : null
-  description = "The ID of the Controller"
+  description = "The AWS controller EC2 instance ID"
+  value       = var.aws_controller ? module.controller[0].controller_id : null
 }
 
-output "controller_os_disk_name" {
-  value       = var.azure_controller ? module.controller[0].controller_os_disk_name : null
-  description = "The OS Disk Name created for the Controller"
+output "controller_public_ip" {
+  description = "The AWS controller public IP address"
+  value       = var.aws_controller ? module.controller[0].controller_public_ip : null
 }
-
-output "controller_os_disk_id" {
-  value       = var.azure_controller ? module.controller[0].controller_os_disk_id : null
-  description = "The  OS Disk Name ID created for the Controller"
-}
-
-# output "controller_ssh_key_path" {
-#   value       = var.azure_controller ? module.controller[0].controller_ssh_key_path : null
-#   description = "The Controller SSH Key Path"
-# }
+# Output from Controller Module
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# Output from the Node
-output "hostnames" {
-  value =   length(local.hostnames) > 0 ? local.hostnames : []
-  description = "The list of hostnames if it has values; otherwise, an empty list"
+# Output from Node Module
+output "account_id" {
+  description = "The Account ID of the Current User."
+  value = var.aws_node ? module.node[0].account_id : null
 }
 
-output "node_nic" {
-  value       = var.azure_node ? module.node[0].node_nic : null
-  description = "The ID of the Network Interface created for the Node"
+output "node_ami_id" {
+  description = "The AMI ID."
+  value       = var.aws_node ? module.node[0].node_ami_id : null
 }
 
 output "node_id" {
-  value       = var.azure_node ? module.node[0].node_id : null
   description = "The ID of the Node"
+  value       = var.aws_node ? module.node[0].node_id : null
 }
 
-output "node_os_disk_name" {
-  value       = var.azure_node ? module.node[0].node_os_disk_name : null
-  description = "The OS Disk Name created for the Node"
+output "node_ip" {
+  description = "The IP of the Node"
+  value       = var.aws_node ? module.node[0].node_ip : null
 }
 
-output "node_os_disk_id" {
-  value       = var.azure_node ? module.node[0].node_os_disk_id : null
-  description = "The  OS Disk Name ID created for the Node"
+output "node_interface_id" {
+  description = "The Interface ID for the Node"
+  value = var.aws_node ? module.node[0].node_interface_id : null
 }
+
+output "node_mac_address" {
+  description = "The MAC address of the EC2 instance"
+  value = var.aws_node ? module.node[0].node_mac_address : null
+}
+# Output from Controller Module
+# ------------------------------------------------------------------------------
+
+
+
+
+
+
+

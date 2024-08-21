@@ -17,10 +17,10 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/provider.tf
+# File: aws/provider.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
+# Date: 2024-08-05
 # Description: Cloud Provider file for the main Terraform configuration for TrinityX.
 # Version: 1.0.0
 # Status: Development
@@ -32,23 +32,26 @@
 
 terraform {
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
 }
 
-provider "azurerm" {
-  features {
-    subscription {
-      prevent_cancellation_on_destroy = true
-    }
-  }
-  subscription_id = var.azure_subscription_id
-  client_id       = var.azure_client_id
-  client_secret   = var.azure_client_secret
-  tenant_id       = var.azure_tenant_id
-  # skip_provider_registration = true
+provider "aws" {
+  region      = var.aws_region
+  access_key  = var.access_key
+  secret_key  = var.secret_key
 }
+
+# ------------------------------------------------------------------------------
+# Make Sure these commands will executed before Installation
+# dnf install chrony
+# systemctl start chronyd
+# systemctl enable chronyd
+# systemctl status chronyd
+# chronyc makestep
+# chronyc tracking
+# pip install boto3 # AWS SDK to import EC2 Image.
 

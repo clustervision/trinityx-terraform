@@ -17,11 +17,11 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/network/variables.tf
+# File: aws/modules/network/variables.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Variables file for the main Terraform configuration for TrinityX.
+# Date: 2024-08-06
+# Description: Variables file for the network module for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
@@ -32,310 +32,238 @@
 # - Ensure sensitive variables are handled securely.
 # ------------------------------------------------------------------------------
 
-variable "azure_resource_group" {
-  description = "The name of the Network Security Group"
-  type        = object({ 
-    name      = string
-    location  = string
-  })
-  default     = {
-    name      = "TrinityX"
-    location  = "Germany West Central"
-  }
-}
-
-variable "azure_nsg" {
-  description = "The name of the Network Security Group"
+variable "aws_availability_zone" {
+  description = "The AWS First Availability Zone for the Region"
   type        = string
-  default     = "TrinityX-NSG"
-  validation {
-    condition     = length(var.azure_nsg) > 1 && length(var.azure_nsg) < 65
-    error_message = "The Azure Network Security Group Name must be between 2 and 64 characters."
-  }
+  default     = ""
 }
 
-variable "azure_nsg_tags" {
-  description = "The Tags for the Network Security Group"
-  type        = map(string)
-  default     = {
-    HPC         = "TrinityX",
-    module      = "network",
-    sub-module  = "security group"
-  }
+variable "aws_vpc_name" {
+  description = "The AWS Network(VPC)."
+  type        = string
+  default     = ""
 }
 
-variable "azure_nsg_security_rules" {
+variable "aws_vpc_cidr_block" {
+  description = "The AWS VPN."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_instance_tenancy" {
+  description = "The AWS OS Image (VHD)."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_enable_dns_support" {
+  description = "The AWS Controller."
+  type        = bool
+  default     = false
+}
+
+variable "aws_vpc_enable_dns_hostnames" {
+  description = "The AWS Node"
+  type        = bool
+  default     = false
+}
+
+variable "aws_vpc_subnet_name" {
+  description = "The AWS VPC Subnet Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_subnet_cidr_block" {
+  description = "The AWS VPC Subnet CIDR Block."
+  type        = string
+  default     = ""
+}
+
+variable "aws_vpc_internet_gateway_name" {
+  description = "The AWS VPC Internet Gateway Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_route_table_cidr_block" {
+  description = "The AWS Route Table CIDR Block."
+  type        = string
+  default     = ""
+}
+
+variable "aws_route_table_name" {
+  description = "The AWS Route Table Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_network_acl_name" {
+  description = "The AWS Network Access Control List Name."
+  type        = string
+  default     = ""
+}
+
+variable "aws_network_acl_rules" {
   description = "List of ports to allow"
   type = list(object({
-    name                       = string
-    priority                   = number
-    direction                  = string
-    access                     = string
-    protocol                   = string
-    source_port_range          = string
-    destination_port_range     = string
-    source_address_prefix      = string
-    destination_address_prefix = string
-    description                = string
+    direction   = string
+    protocol    = string
+    rule_no     = number
+    action      = string
+    cidr_block  = string
+    from_port   = number
+    to_port     = number
   }))
   default = [
     {
-      name                       = "Allow-SSH"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 22 for SSH."
+      direction  = "egress"
+      protocol   = "udp"
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 500
+      to_port    = 500
     },
     {
-      name                       = "Allow-HTTP"
-      priority                   = 200
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 80 for Nginx."
+      direction  = "egress"
+      protocol   = "udp"
+      rule_no    = 110
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 4500
+      to_port    = 4500
     },
     {
-      name                       = "Allow-HTTPS"
-      priority                   = 300
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 443 for SSL."
+      direction  = "ingress"
+      protocol   = "udp"
+      rule_no    = 100
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 500
+      to_port    = 500
     },
     {
-      name                       = "Allow-HTTP-Alt"
-      priority                   = 400
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "8080"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 8080 for OOD."
-    },
-    {
-      name                       = "Allow-Custom-1"
-      priority                   = 500
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7050"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7050 for Lunqa2 Daemon."
-    },
-    {
-      name                       = "Allow-Custom-2"
-      priority                   = 600
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7055"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7055 for Nginx."
-    },
-    {
-      name                       = "Allow-Custom-3"
-      priority                   = 700
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7051"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7051 for Nginx."
-    },
-    {
-      name                       = "Allow-TFTP"
-      priority                   = 800
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "69"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 69 for TFTP."
-    },
-    {
-      name                       = "Allow-WireGuard"
-      priority                   = 900
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "51820"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 51820 for TFTP."
-    },
-    {
-      name                       = "Allow-SSH-Out"
-      priority                   = 1000
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 22 for SSH."
-    },
-    {
-      name                       = "Allow-HTTP-Out"
-      priority                   = 1100
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "80"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 80 for Nginx."
-    },
-    {
-      name                       = "Allow-HTTPS-Out"
-      priority                   = 1200
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "443"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 443 for SSL."
-    },
-    {
-      name                       = "Allow-HTTP-Alt-Out"
-      priority                   = 1300
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "8080"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 8080 for OOD."
-    },
-    {
-      name                       = "Allow-Custom-1-Out"
-      priority                   = 1400
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7050"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7050 for Lunqa2 Daemon."
-    },
-    {
-      name                       = "Allow-Custom-2-Out"
-      priority                   = 1500
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7055"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7055 for Nginx."
-    },
-    {
-      name                       = "Allow-Custom-3-Out"
-      priority                   = 1600
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "7051"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 7051 for Nginx."
-    },
-    {
-      name                       = "Allow-TFTP-Out"
-      priority                   = 1700
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "69"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 69 for TFTP."
-    },
-    {
-      name                       = "Allow-WireGuard-Out"
-      priority                   = 1800
-      direction                  = "Outbound"
-      access                     = "Allow"
-      protocol                   = "*"
-      source_port_range          = "*"
-      destination_port_range     = "51820"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-      description                = "TrinityX Using Port 51820 for TFTP."
+      direction  = "ingress"
+      protocol   = "udp"
+      rule_no    = 110
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = 4500
+      to_port    = 4500
     }
   ]
 }
 
-variable "azure_virtual_network" {
-  description = "The name of the Network Security Group"
+variable "aws_security_group_name" {
+  description = "The AWS security group name."
   type        = string
-  default     = "TrinityX-Vnet"
+  default     = ""
 }
 
-variable "azure_virtual_network_tags" {
-  description = "The Tags for the Virtual Network"
-  type        = map(string)
-  default     = {
-    HPC         = "TrinityX",
-    module      = "network",
-    sub-module  = "virtual network"
-  }
-}
-
-variable "azure_virtual_network_address_space" {
-  description = "The address spcae for the Virtual Network"
-  type        = list
-  default     = [
-    "10.1.0.0/16"  
-  ]
-}
-
-variable "azure_virtual_network_encryption" {
-  description = "The Virtual Network Encryption"
-  type        = string
-  default     = "AllowUnencrypted"
-}
-
-variable "azure_virtual_network_subnets" {
-  description = "The Subnets for the Virtual Network"
-  type        = list(object({
-    name            = string
-    address_prefix  = string
-    security_group  = string
+variable "aws_security_group_rules" {
+  description = "List of ports to allow"
+  type = list(object({
+    direction   = string
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+    description = string
+    
   }))
-  default     = [
-    {"name": "cluster",   "address_prefix": "10.1.0.0/24", "security_group": "TrinityX-NSG"}
+  default = [
+    {
+      direction   = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 500
+      to_port     = 500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 4500
+      to_port     = 4500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow inbound VPN traffic"
+    },
+    {
+      direction   = "egress"
+      from_port   = 500
+      to_port     = 500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
+    },
+    {
+      direction   = "egress"
+      from_port   = 4500
+      to_port     = 4500
+      protocol    = "udp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow outbound VPN traffic"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow SSH"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTP"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow HTTPS"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow OOD 8080"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 7050
+      to_port     = 7050
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7050"
+    },
+    {
+      direction   = "ingress"
+      from_port   = 7051
+      to_port     = 7051
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow TrinityX 7051"
+    }
   ]
 }
+
+
+
+

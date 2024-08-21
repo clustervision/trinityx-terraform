@@ -17,135 +17,69 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/controller/variables.tf
+# File: aws/modules/node/variables.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Variables file for the all resources for the controller.
+# Date: 2024-08-09
+# Description: Terraform Variables file for the node module for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - Define all the input variables required by the vpn module.
+# - Define all the input variables required by the node module.
 # - Update the default values as needed to match the target environment.
 # - Ensure sensitive variables are handled securely.
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ #
-# Azure Resource Group & Subnet ID
-variable "azure_resource_group" {
-  description = "The name of the Resource Group"
-  type        = object({ 
-    name      = string
-    location  = string
-  })
-  default     = {
-    name      = "TrinityX"
-    location  = "Germany West Central"
-  }
-}
-
-variable "subnet_id" {
-  type        = string
-  description = "The ID of the subnet to place the VM in"
-}
-
-variable "image_id" {
-  type        = string
-  default     = ""
-  description = "The ID of the Azure Image which is created by the VHD"
-}
-
 variable "hostnames" {
-  type        = list
   description = "The ID of the subnet to place the VM in"
+  type        = list
   default     = []
 }
 
-variable "azure_vm_network_ip_name" {
-  description = "The Network IP Name for the Controller"
-  type        = string
-  default     = "internal"
-}
-
-variable "storage_name" {
-  type        = string
-  description = "The Name of the Storage Account"
-}
-
-# Azure Resource Group & Subnet ID
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Azure Node
-variable "azure_hostlist" {
-  description = "List of Azure nodes in the format azvm[001-004]"
-  default     = "azvm[001-004]"
-}
-
-variable "azure_node_network_private_ip_allocation" {
-  description = "The Private IP Allocation for the Node(s)"
-  type        = string
-  default     = "Dynamic"
-}
-
-variable "azure_node_size" {
-  description = "The size of the Node"
-  type        = string
-  default     = "Standard_D2s_v3"
-}
-
-variable "azure_node_delete_os_disk" {
-  description = "Delete OS disk on Termination for Node(s)"
-  type        = bool
-  default     = true
-}
-
-variable "azure_node_delete_data_disk" {
-  description = "Delete Data disk on Termination for Node(s)"
-  type        = bool
-  default     = true
-}
-
-variable "azure_node_os_caching" {
-  description = "Node OS Caching"
-  type        = string
-  default     = "ReadWrite"
-}
-
-variable "azure_node_os_create" {
-  description = "Node OS Create Option from"
-  type        = string
-  default     = "FromImage"
-}
-
-variable "azure_node_os_disk_type" {
-  description = "The OS Disk Type for the Node"
-  type        = string
-  default     = "Standard_LRS"
-}
-
-variable "azure_node_os_username" {
-  description = "The OS Username for the Node"
-  type        = string
-  default     = "azureuser"
-}
-
-variable "azure_node_os_password" {
-  description = "The OS Password for the Node"
+variable "vpc_id" {
+  description = "The AWS VPC ID."
   type        = string
   default     = ""
 }
 
-variable "azure_node_disable_auth" {
-  description = "Disable password Authentication for the Node"
+variable "public_subnet_id" {
+  description = "The AWS Public Subnet ID for the VPC."
+  type        = string
+  default     = ""
+}
+
+variable "sg_id" {
+  description = "The AWS Security Group ID of the VPC."
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_instance_type" {
+  description = "The AWS Node instance type."
+  type        = string
+  default     = ""
+}
+
+variable "aws_node_automatic_public_ip" {
+  description = "The AWS node automatic association of public IP."
   type        = bool
   default     = false
 }
 
-# Azure Node
-# ------------------------------------------------------------------------------ #
+variable "aws_node_root_device_size" {
+  description = "The AWS node root block device size in GB."
+  type        = number
+  default     = 0
+}
+
+variable "aws_node_root_device_type" {
+  description = "The AWS node root block device type(HDD, SSD, or Magnetic)."
+  type        = string
+  default     = ""
+}
+
 
 
 

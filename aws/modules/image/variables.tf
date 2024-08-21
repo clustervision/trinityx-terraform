@@ -17,243 +17,163 @@
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-# File: azure/modules/image/variables.tf
+# File: aws/modules/image/variables.tf
 # Author: Sumit Sharma
 # E-Mail: sumit.sharma@clustervision.com
-# Date: 2024-05-31
-# Description: Variables file for the Images, Shared Images, And Versioning.
+# Date: 2024-08-08
+# Description: Terraform Variables file for the image module for TrinityX.
 # Version: 1.0.0
 # Status: Development
 # License: GPL
 # ------------------------------------------------------------------------------
 # Notes:
-# - Define all the input variables required by the main configuration and modules.
+# - Define all the input variables required by the image module.
 # - Update the default values as needed to match the target environment.
 # - Ensure sensitive variables are handled securely.
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------ #
-# Azure Resource Group
-variable "azure_resource_group" {
-  description = "The name of the Network Security Group"
-  type        = object({ 
-    name      = string
-    location  = string
-  })
-  default     = {
-    name      = "TrinityX"
-    location  = "Germany West Central"
-  }
-}
-# Azure Resource Group
-# ------------------------------------------------------------------------------ #
-
-# ------------------------------------------------------------------------------ #
-# Storage & VHD Variable from Storage Module
-variable "storage_id" {
-  type        = string
-  description = "The ID of the Storage Account"
-  default     = ""
-}
-
-variable "vhd_url" {
-  description = "The URL of the Uploaded VHD"
+variable "aws_region" {
+  description = "The AWS Region for the Installation"
   type        = string
   default     = ""
 }
-# Storage & VHD Variable from Storage Module
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Image
-variable "azure_image" {
-  description = "The Name for Azure Image"
+variable "access_key" {
+  description = "The AWS Access Key"
   type        = string
-  default     = "TrinityX-Compute"
+  default     = ""
 }
 
-variable "azure_image_tags" {
-  description = "The Tags for the Azure Image"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "vhd"
-  }
-}
-
-variable "azure_image_zone_resilient" {
-  description = "The zone resiliency for Azure Image"
-  type        = bool
-  default     = true
-}
-
-variable "azure_image_hyper_v_generation" {
-  description = "The HyperV Generation Type for Azure Image"
+variable "secret_key" {
+  description = "The AWS Secret Key"
   type        = string
-  default     = "V2"
+  default     = ""
 }
 
-variable "azure_image_os_type" {
-  description = "The operating system type for Azure Image"
+variable "bucket_name" {
+  description = "The AWS S3 Bucket name."
   type        = string
-  default     = "Linux"
+  default     = ""
 }
 
-variable "azure_image_os_state" {
-  description = "The operating system state for Azure Image"
+variable "aws_s3_object_key_path" {
+  description = "The AWS S3 Object key(remote path)."
   type        = string
-  default     = "Generalized"
+  default     = ""
 }
 
-variable "azure_image_cachinge" {
-  description = "The caching mode for Azure Image"
+variable "aws_s3_object_source" {
+  description = "The AWS S3 Object Source(local path)."
   type        = string
-  default     = "ReadWrite"
+  default     = ""
 }
-# Azure Image
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery
-variable "azure_compute_gallery" {
-  description = "The Account Name for Azure Compute Gallery"
+variable "aws_s3_object_content_type" {
+  description = "The AWS S3 Object content type."
   type        = string
-  default     = "TrinityXGallery"
+  default     = ""
 }
 
-variable "azure_compute_gallery_tags" {
-  description = "The Tags for the Azure Compute Gallery"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery"
-  }
-}
-
-variable "azure_compute_gallery_description" {
-  description = "The Account Name for Azure Compute Gallery"
+variable "aws_s3_object_encryption" {
+  description = "The AWS S3 Object encryption."
   type        = string
-  default     = "This is TrinityX Image Gallery. Here you can attach your own OS Images and share depends on your need."
+  default     = ""
 }
 
-variable "azure_compute_gallery_sharing" {
-  description = "The Account Name for Azure Storage Account"
+variable "aws_iam_role_name" {
+  description = "The AWS IAM role name."
   type        = string
-  default     = "Private"
+  default     = ""
 }
-# Azure Compute Gallery
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery Image
-variable "azure_shared_image" {
-  description = "The Name for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_version" {
+  description = "The AWS IAM role policy version."
   type        = string
-  default     = "TrinityX-Compute"
+  default     = ""
 }
 
-variable "azure_shared_image_tags" {
-  description = "The Tags for the Shared Image within a Shared Image Gallery"
-  type    = map(string)
-  default = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery shared"
-  }
-}
-
-variable "azure_shared_image_os_type" {
-  description = "The operating system type for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_effect" {
+  description = "The AWS IAM role policy effect."
   type        = string
-  default     = "Linux"
+  default     = ""
 }
 
-variable "azure_shared_image_trusted_launch" {
-  description = "The Trusted Launch for Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = true
-}
-
-variable "azure_shared_image_hyper_v_generation" {
-  description = "The HyperV Generation forShared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_service" {
+  description = "The AWS IAM role policy service."
   type        = string
-  default     = "V2"
+  default     = ""
 }
 
-variable "azure_shared_accelerated_network" {
-  description = "The Accelerated Network for Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = true
-}
-
-variable "azure_shared_architecture" {
-  description = "The Architecture for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_action" {
+  description = "The AWS IAM role policy action."
   type        = string
-  default     = "x64"
+  default     = ""
 }
 
-variable "azure_shared_image_publisher" {
-  description = "The Publisher for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_ec2_access" {
+  description = "The AWS IAM role policy EC2 Access."
   type        = string
-  default     = "TrinityX"
+  default     = ""
 }
 
-variable "azure_shared_image_offer" {
-  description = "The Offers for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_ec2_role" {
+  description = "The AWS IAM role policy EC2 Role for SSM."
   type        = string
-  default     = "HPC"
+  default     = ""
 }
 
-variable "azure_shared_image_sku" {
-  description = "The SKU for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_s3_access" {
+  description = "The AWS IAM role policy S3 Access."
   type        = string
-  default     = "iPXE-GRUB"
+  default     = ""
 }
-# Azure Compute Gallery Image
-# ------------------------------------------------------------------------------ #
 
-# ------------------------------------------------------------------------------ #
-# Azure Compute Gallery Image Version
-variable "azure_shared_image_version" {
-  description = "The Version for Shared Image within a Shared Image Gallery"
+variable "aws_iam_role_policy_s3_read" {
+  description = "The AWS IAM role policy S3 read-only access."
   type        = string
-  default     = "0.0.1"
+  default     = ""
 }
 
-variable "azure_shared_image_version_tags" {
-  description = "The Tags for the Version of a Shared Image within a Shared Image Gallery"
-  type        = map(string)
-  default     = {
-    HPC        = "TrinityX"
-    module     = "image",
-    sub-module = "gallery version"
-  }
-}
-
-variable "azure_shared_image_version_replication_mode" {
-  description = "The Replication Mode for Version of a Shared Image within a Shared Image Gallery"
+variable "aws_image_license_type" {
+  description = "The AWS AMI image license type."
   type        = string
-  default     = "Full"
+  default     = ""
 }
 
-variable "azure_shared_image_version_regional_replica_count" {
-  description = "The Account Name for Version of a Shared Image within a Shared Image Gallery"
-  type        = number
-  default     = 1
-}
-
-variable "azure_shared_image_version_latest" {
-  description = "Exclude from Latest for Version of a Shared Image within a Shared Image Gallery"
-  type        = bool
-  default     = false
-}
-
-variable "azure_shared_image_version_storage_account_type" {
-  description = "The Account Name for Version of a Shared Image within a Shared Image Gallery"
+variable "aws_image_boot_mode" {
+  description = "The AWS AMI image boot mode."
   type        = string
-  default     = "Standard_ZRS"
+  default     = ""
 }
-# Azure Compute Gallery Image Version
-# ------------------------------------------------------------------------------ #
+
+variable "aws_image_description" {
+  description = "The AWS AMI image description."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_platform" {
+  description = "The AWS AMI image platform."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_role" {
+  description = "The AWS AMI image role for import."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_container_format" {
+  description = "The AWS AMI image container format."
+  type        = string
+  default     = ""
+}
+
+variable "aws_image_containe_desc" {
+  description = "The AWS AMI image container description."
+  type        = string
+  default     = ""
+}
+
+
