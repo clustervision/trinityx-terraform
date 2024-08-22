@@ -122,7 +122,7 @@ resource "null_resource" "import_image" {
       mkdir -p /tmp/.trinityx
       aws ec2 import-image \
         --license-type ${var.aws_image_license_type} \
-        --disk-containers Format=${var.aws_image_container_format},Url=S3://${var.bucket_name}/${aws_s3_object.compute_image.key},Description=${var.aws_image_containe_desc} \
+        --disk-containers Format=${var.aws_image_container_format},Url=S3://${var.bucket_name}/${aws_s3_object.compute_image.key},Description=${var.aws_image_container_desc} \
         --boot-mode ${var.aws_image_boot_mode} \
         --description ${var.aws_image_description} \
         --platform ${var.aws_image_platform} \

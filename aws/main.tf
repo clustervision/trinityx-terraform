@@ -124,7 +124,7 @@ module "storage" {
 # This module will create a AMI on the AWS storage S3
 # ------------------------------------------------------------------------------
 module "image" {
-  count       = var.aws_image ? 1 : 0
+  count       = var.aws_images ? 1 : 0
   source      = "./modules/image"
   bucket_name = module.storage[0].bucket_name
 
@@ -154,7 +154,7 @@ module "image" {
   aws_image_platform          = var.aws_image_platform
   aws_image_role              = var.aws_image_role
   aws_image_container_format  = var.aws_image_container_format
-  aws_image_containe_desc     = var.aws_image_containe_desc
+  aws_image_container_desc    = var.aws_image_container_desc
 }
 
 # ------------------------------------------------------------------------------

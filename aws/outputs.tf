@@ -127,12 +127,12 @@ output "bucket_arn" {
 # ------------------------------------------------------------------------------
 # Output from Image Module
 output "object_url" {
-  value       = var.aws_image ? module.image[0].object_url : null
+  value       = var.aws_images ? module.image[0].object_url : null
   description = "The S3 URL for the VHD."
 }
 
 output "ami_id" {
-  value       = var.aws_image ? module.image[0].ami_id : null
+  value       = var.aws_images ? module.image[0].ami_id : null
   description = "The AMI ID."
 }
 # Output from Image Module
