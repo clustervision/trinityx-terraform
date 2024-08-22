@@ -37,7 +37,7 @@
 aws_network     = true
 aws_vpn         = true
 aws_storage     = true
-aws_image       = true
+aws_images      = true
 aws_controller  = true
 aws_node        = true
 
@@ -262,7 +262,7 @@ aws_image_description       = "TrinityX-Compute"
 aws_image_platform          = "Linux"
 aws_image_role              = "TrinityImageRole"
 aws_image_container_format  = "vhd"
-aws_image_containe_desc     = "Rocky9"
+aws_image_container_desc    = "Rocky9"
 
 # AWS Controller
 aws_controller_ami_latest         = true

@@ -170,7 +170,7 @@ variable "aws_image_container_format" {
   default     = ""
 }
 
-variable "aws_image_containe_desc" {
+variable "aws_image_container_desc" {
   description = "The AWS AMI image container description."
   type        = string
   default     = ""

@@ -52,7 +52,7 @@ variable "aws_storage" {
   default     = false
 }
 
-variable "aws_image" {
+variable "aws_images" {
   description = "The AWS OS Image (VHD)."
   type        = bool
   default     = false
@@ -600,7 +600,7 @@ variable "aws_image_container_format" {
   default     = ""
 }
 
-variable "aws_image_containe_desc" {
+variable "aws_image_container_desc" {
   description = "The AWS AMI image container description."
   type        = string
   default     = ""
