@@ -114,27 +114,36 @@ resource "aws_instance" "controller" {
   echo "root:${var.aws_controller_os_password}" | chpasswd
 
   # Enable root login via SSH
-  sed -i 's/^PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+  sed -i 's/^#PermitRootLogin[[:space:]]\+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+  # Add public SSH key to root authorized_keys
+  echo "${var.aws_controller_ssh_public_key} TrinityX" >> /root/.ssh/authorized_keys
+
+  if [[ "${var.aws_controller_os_username}" != "" && "${var.aws_controller_os_username}" != "root" ]]; then
+
+    # Create the ${var.aws_controller_os_username} user with a home directory
+    useradd -m -s /bin/bash ${var.aws_controller_os_username}
+
+    # Set the password for the ${var.aws_controller_os_username} user
+    echo "${var.aws_controller_os_username}:${var.aws_controller_os_password}" | chpasswd
+
+    # Enable SSH access for the ${var.aws_controller_os_username} user
+    mkdir -p /home/${var.aws_controller_os_username}/.ssh
+    chmod 700 /home/${var.aws_controller_os_username}/.ssh
+    touch /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+    chmod 600 /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+    chown -R ${var.aws_controller_os_username}:${var.aws_controller_os_username} /home/${var.aws_controller_os_username}/.ssh
+
+    # Add public SSH key to your user authorized_keys
+    echo "${var.aws_controller_ssh_public_key} TrinityX" >> /home/${var.aws_controller_os_username}/.ssh/authorized_keys
+
+    # Grant sudo privileges to ${var.aws_controller_os_username} without a password
+    echo "${var.aws_controller_os_username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+  
+  fi
+
+  sed -i 's/^PasswordAuthentication no$/PasswordAuthentication yes/' /etc/ssh/sshd_config.d/50-cloud-init.conf
   systemctl restart sshd
-
-  # Create the ${var.aws_controller_os_username} user with a home directory
-  useradd -m -s /bin/bash ${var.aws_controller_os_username}
-
-  # Set the password for the ${var.aws_controller_os_username} user
-  echo "${var.aws_controller_os_username}:${var.aws_controller_os_password}" | chpasswd
-
-  # Enable SSH access for the ${var.aws_controller_os_username} user
-  mkdir -p /home/${var.aws_controller_os_username}/.ssh
-  chmod 700 /home/${var.aws_controller_os_username}/.ssh
-  touch /home/${var.aws_controller_os_username}/.ssh/authorized_keys
-  chmod 600 /home/${var.aws_controller_os_username}/.ssh/authorized_keys
-  chown -R ${var.aws_controller_os_username}:${var.aws_controller_os_username} /home/${var.aws_controller_os_username}/.ssh
-
-  # Add public SSH key to authorized_keys (replace with your actual public key)
-  echo "${var.aws_controller_ssh_public_key} TrinityX" >> /home/${var.aws_controller_os_username}/.ssh/authorized_keys
-
-  # Grant sudo privileges to ${var.aws_controller_os_username} without a password
-  echo "${var.aws_controller_os_username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
   echo "+--------------------------------------------------------------------------+"
   echo "Resizing the Root Partition"
@@ -164,6 +173,13 @@ resource "aws_instance" "controller" {
       exit 1
   fi
   echo "Root partition successfully resized."
+  echo "+--------------------------------------------------------------------------+"
+  
+  echo "+--------------------------------------------------------------------------+"
+  echo "Updating the package manager."
+  yum makecache
+  yum update -y
+  echo "Package manager updated."
   echo "+--------------------------------------------------------------------------+"
 
   EOF
