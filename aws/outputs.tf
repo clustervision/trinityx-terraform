@@ -77,6 +77,11 @@ output "vpn_gateway_id" {
   description = "The ID of the VPN gateway ID created in VPN Module"
 }
 
+output "vpn_route_id" {
+  value       = var.aws_vpn ? module.vpn[0].vpn_route_id : null
+  description = "The ID of the VPN gateway Route created in VPN Module"
+}
+
 output "vpn_connection_id" {
   value       = var.aws_vpn ? module.vpn[0].vpn_connection_id : null
   description = "The ID of the VPN connection ID created in VPN Module"

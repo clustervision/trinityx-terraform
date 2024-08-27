@@ -5,6 +5,7 @@
 - [ ] Create a Customer Gateway.
 - [ ] Create a Virtual Private Gateway.
 - [ ] Attach the VPN gateway to the VPC.
+- [ ] Create a Route of VPN to Routing Table.
 - [ ] Create a Site-to-Site VPN Connection.
 - [ ] Set the VPN Connection Route.
 

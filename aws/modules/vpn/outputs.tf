@@ -46,6 +46,11 @@ output "vpn_gateway_id" {
   description = "The ID of the VPN gateway ID created in VPN Module"
 }
 
+output "vpn_route_id" {
+  value       = aws_route.vpn_route.id
+  description = "The ID of the VPN gateway Route created in VPN Module"
+}
+
 output "vpn_connection_id" {
   value       = aws_vpn_connection.trinityx_vpn.id
   description = "The ID of the VPN connection ID created in VPN Module"

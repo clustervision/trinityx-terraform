@@ -80,6 +80,17 @@ resource "aws_vpn_gateway_attachment" "trinityx_vpg_attachment" {
 }
 
 # ------------------------------------------------------------------------------
+# Route for the VPN connection
+# This block will create a route in the specified route table to route traffic
+# destined for the VPN Route network through the Virtual Private Gateway.
+# ------------------------------------------------------------------------------
+resource "aws_route" "vpn_route" {
+  route_table_id         = var.route_table_id
+  destination_cidr_block = var.aws_vpn_local_ipv4_network_cidr
+  gateway_id             = aws_vpn_gateway.trinityx_vpg.id 
+}
+
+# ------------------------------------------------------------------------------
 # Site-to-Site VPN Connection
 # This block will create a Site-to-Site VPN Connection.
 # ------------------------------------------------------------------------------
