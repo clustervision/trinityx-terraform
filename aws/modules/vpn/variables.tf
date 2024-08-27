@@ -38,6 +38,12 @@ variable "vpc_id" {
   default     = ""
 }
 
+variable "route_table_id" {
+  description = "The AWS Route Table ID of the VPC."
+  type        = string
+  default     = ""
+}
+
 variable "aws_customer_gateway_name" {
   description = "The AWS customer gateway name."
   type        = string

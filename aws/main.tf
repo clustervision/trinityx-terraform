@@ -77,9 +77,10 @@ module "network" {
 # and connection routes.
 # ------------------------------------------------------------------------------
 module "vpn" {
-  count   = var.aws_vpn ? 1 : 0
-  source  = "./modules/vpn"
-  vpc_id  = module.network[0].vpc_id
+  count           = var.aws_vpn ? 1 : 0
+  source          = "./modules/vpn"
+  vpc_id          = module.network[0].vpc_id
+  route_table_id  = module.network[0].route_table_id
   
   aws_customer_gateway_name       = var.aws_customer_gateway_name
   aws_customer_gateway_bgp_asn    = var.aws_customer_gateway_bgp_asn
@@ -95,6 +96,8 @@ module "vpn" {
   aws_vpn_remote_ipv4_network_cidr  = var.aws_vpn_remote_ipv4_network_cidr
 
   aws_vpn_connection_route_cidr_block = var.aws_vpn_connection_route_cidr_block
+
+  depends_on =  [ module.network ]
 }
 
 
